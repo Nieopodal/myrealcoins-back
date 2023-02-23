@@ -14,7 +14,6 @@ app
 
 app
     .get('/', async (req, res) => {
-
         res.json({
             status: 'ok',
         });
