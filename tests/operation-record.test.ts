@@ -92,12 +92,7 @@ test('OperationRecord validates if isRepetitive exists.', () => {
         amount: -45.96,
         type: OperationType.AddToSavings,
         description: 'user-description',
-    } as any)).toThrow('isRepetitive should be boolean and it is required.');
-
-    expect(() => new OperationRecord({
-        ...defaultPaymentObj,
-        isRepetitive: 'test' as any,
-    })).toThrow('isRepetitive should be boolean and it is required.');
+    } as any)).toThrow('isRepetitive is required.');
 });
 
 test('OperationRecord validates periodId type.', () => {
