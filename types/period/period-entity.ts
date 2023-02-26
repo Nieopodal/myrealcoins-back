@@ -1,13 +1,18 @@
+export interface NewPeriodEntity extends Omit<PeriodEntity, 'id' | 'starts' | 'ends'> {
+    id?: string;
+    starts?: string;
+    ends?: string;
+}
+
 export interface PeriodEntity {
     id: string;
     userId: string;
-    operationIds: string[];
-    title: string;
+    isActive: boolean;
     starts: string;
     ends: string;
-    isActive: boolean;
     budgetAmount: number;
     paymentsAmount: number;
     savingsAmount: number;
     freeCashAmount: number;
+    createdAt?: string;
 }
