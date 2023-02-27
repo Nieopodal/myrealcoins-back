@@ -31,7 +31,7 @@ export class OperationRecord implements OperationEntity {
         this.validateEveryNewOperation(obj);
 
         if (obj.type === OperationType.Payment) {
-            this.ValidateNewPaymentOperation(obj);
+            this.validateNewPaymentOperation(obj);
         }
 
         this.id = obj.id ?? uuid();
@@ -72,7 +72,7 @@ export class OperationRecord implements OperationEntity {
         }
     };
 
-    private ValidateNewPaymentOperation(obj: NewOperationEntity) {
+    private validateNewPaymentOperation(obj: NewOperationEntity) {
         if (obj.category < 0 || typeof obj.category !== 'number') {
             throw new ValidationError('Dla każdej płatności jej kategoria jest wymagana.');
         }
@@ -93,7 +93,7 @@ export class OperationRecord implements OperationEntity {
         }
     };
 
-    static async getOne(id: string, userId: string): Promise<OperationEntity> {
+    static async getOne(id: string, userId: string): Promise<OperationEntity | null> {
         const [results] = await pool.execute("SELECT * FROM `operations` WHERE id = :id AND `userId` = :userId", {
             id,
             userId
@@ -109,7 +109,7 @@ export class OperationRecord implements OperationEntity {
     static async getAll(description: string, userId: string): Promise<OperationEntity[]> {
         const [results] = await pool.execute("SELECT * FROM `operations` WHERE `description` LIKE :search AND `userId` = :userId", {
             search: `%${description}%`,
-            userId
+            userId,
         }) as OperationRecordResults;
 
         return results.map(obj => new OperationRecord(obj));

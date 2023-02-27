@@ -15,7 +15,7 @@ const defaultPeriodObject: NewPeriodEntity = {
     paymentsAmount: 3000,
     savingsAmount: 1000,
     freeCashAmount: 1000,
-    createdAt: '2023-02-01 00-00-00',
+    createdAt: '2023-02-01 00:00:00',
 };
 
 test('PeriodRecord can build proper objects.', () => {
@@ -30,7 +30,7 @@ test('PeriodRecord can build proper objects.', () => {
     expect(per.paymentsAmount).toBe(3000);
     expect(per.savingsAmount).toBe(1000);
     expect(per.freeCashAmount).toBe(1000);
-    expect(per.createdAt).toBe('2023-02-01 00-00-00');
+    expect(per.createdAt).toBe('2023-02-01 00:00:00');
 });
 
 test('PeriodRecord creates a valid UUID for a new entry.', () => {
@@ -48,7 +48,7 @@ test('PeriodRecord validates if userId exists', () => {
         paymentsAmount: 3000,
         savingsAmount: 1000,
         freeCashAmount: 1000,
-        createdAt: '2023-02-01 00-00-00',
+        createdAt: '2023-02-01 00:00:00',
     } as any)).toThrow('User ID is required.');
 });
 
@@ -60,7 +60,7 @@ test('PeriodRecord validates if isActive exists.', () => {
         paymentsAmount: 3000,
         savingsAmount: 1000,
         freeCashAmount: 1000,
-        createdAt: '2023-02-01 00-00-00',
+        createdAt: '2023-02-01 00:00:00',
     } as any)).toThrow('isActive is required.');
 });
 

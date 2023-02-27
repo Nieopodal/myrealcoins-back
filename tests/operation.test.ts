@@ -88,7 +88,7 @@ test('OperationRecord.insert returns new UUID and inserts data into database. Op
 
 });
 
-test('OperationRecord.update changes data in database', async () => {
+test('OperationRecord.update changes data in database.', async () => {
     const op = new OperationRecord(defaultPaymentObj);
     await op.insert();
 

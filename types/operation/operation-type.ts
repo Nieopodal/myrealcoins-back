@@ -1,9 +1,11 @@
 export enum OperationType {
-    AddToBudget,
-    Payment,
-    AddToSavings,
-    AddFromSavings,
-    AddToCushion,
-    AddFromCushion,
-    BudgetReduction,
+    AddToBudget,    //+ jest
+    Payment,        //- jest
+    AddToSavings,   //- jest
+    AddFromSavings, //+ jest
+    AddToCushion,   //-
+    AddFromCushion, //+
+    BudgetReduction,//-
+
+    //@TODO remove comments when it,s done
 }
