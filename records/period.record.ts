@@ -4,6 +4,7 @@ import {getFirstAndLastDateOfActualMonth, getStandardFormattedDateTime} from "..
 import {pool} from "../utils/db";
 import {FieldPacket, ResultSetHeader} from "mysql2";
 import {ValidationError} from "../utils/error";
+import {isAfter} from "date-fns";
 
 type PeriodRecordResults = [PeriodEntity[], FieldPacket[]];
 
@@ -83,6 +84,14 @@ export class PeriodRecord implements PeriodEntity {
         return results.map(obj => new PeriodRecord(obj));
     };
 
+    private async update(): Promise<void> {
+        const result = await pool.execute("UPDATE `periods` SET `isActive` = :isActive, `budgetAmount` = :budgetAmount, `paymentsAmount` = :paymentsAmount, `savingsAmount` = :savingsAmount, `freeCashAmount` = :freeCashAmount WHERE `id` = :id AND `userId` = :userId", this);
+
+        if ((result[0] as ResultSetHeader).affectedRows === 0) {
+            throw new Error('Error while updating, number of affected rows is 0.');
+        }
+    };
+
     async addPaymentOperation(amount: number): Promise<void> {
 
         if(amount > 0) {
@@ -95,16 +104,7 @@ export class PeriodRecord implements PeriodEntity {
         this.freeCashAmount += Number(amount.toFixed(2));
         this.paymentsAmount += Number((amount*-1).toFixed(2));
 
-        const result = await pool.execute("UPDATE `periods` SET `freeCashAmount` = :freeCashAmount, `paymentsAmount` = :paymentsAmount WHERE `id` = :id AND `userId` = :userId", {
-            freeCashAmount: this.freeCashAmount,
-            paymentsAmount: this.paymentsAmount,
-            id: this.id,
-            userId: this.userId,
-        });
-
-        if ((result[0] as ResultSetHeader).affectedRows === 0) {
-            throw new Error('Error while updating, number of affected rows is 0.');
-        }
+        await this.update();
     };
 
     async addToSavingsOperation(amount: number): Promise<void> {
@@ -117,16 +117,7 @@ export class PeriodRecord implements PeriodEntity {
         this.freeCashAmount += Number(amount.toFixed(2));
         this.savingsAmount += Number((amount*-1).toFixed(2));
 
-        const result = await pool.execute("UPDATE `periods` SET `freeCashAmount` = :freeCashAmount, `savingsAmount` = :savingsAmount WHERE `id` = :id AND `userId` = :userId", {
-            freeCashAmount: this.freeCashAmount,
-            savingsAmount: this.savingsAmount,
-            id: this.id,
-            userId: this.userId,
-        });
-
-        if ((result[0] as ResultSetHeader).affectedRows === 0) {
-            throw new Error('Error while updating, number of affected rows is 0.');
-        }
+        await this.update();
     };
 
     async addFromSavingsOperation(amount: number): Promise<void> {
@@ -140,17 +131,7 @@ export class PeriodRecord implements PeriodEntity {
         this.savingsAmount += Number((amount*-1).toFixed(2));
         this.freeCashAmount += Number(amount.toFixed(2));
 
-
-        const result = await pool.execute("UPDATE `periods` SET `freeCashAmount` = :freeCashAmount, `savingsAmount` = :savingsAmount WHERE `id` = :id AND `userId` = :userId", {
-            freeCashAmount: this.freeCashAmount,
-            savingsAmount: this.savingsAmount,
-            id: this.id,
-            userId: this.userId,
-        });
-
-        if ((result[0] as ResultSetHeader).affectedRows === 0) {
-            throw new Error('Error while updating, number of affected rows is 0.');
-        }
+        await this.update();
     };
 
     async changeBudgetOperation(amount: number): Promise<void> {
@@ -170,24 +151,54 @@ export class PeriodRecord implements PeriodEntity {
 
         this.freeCashAmount += Number(amount.toFixed(2));
         this.budgetAmount += Number(amount.toFixed(2));
-        const result = await pool.execute("UPDATE `periods` SET `freeCashAmount` = :freeCashAmount, `budgetAmount` = :budgetAmount WHERE `id` = :id AND `userId` = :userId", {
-            freeCashAmount: this.freeCashAmount,
-            budgetAmount: this.budgetAmount,
-            id: this.id,
-            userId: this.userId,
-        });
 
-        if ((result[0] as ResultSetHeader).affectedRows === 0) {
-            throw new Error('Error while updating, number of affected rows is 0.');
-        }
+        await this.update();
     };
 
     async addToCushionOperation() {} //@TODO make this working, amount should be -
 
     async addFromCushionOperation() {} //@TODO make this working, amount should be +
 
-    async createNewPeriod() {} //@TODO make this working
+    async closePeriod(): Promise<void>{
+        if (this.isActive === false) {
+            throw new Error('Trying to close period which is already closed.');
+        } else if (this.isActive === true) {
+            this.isActive = false;
+            await this.update();
+        } else {
+            throw new Error('isActive should be a boolean value.');
+        }
+    };
 
-    private async closeOldPeriod() {} //@TODO make this working
+    checkIfActualPeriodShouldEnd(): boolean {
+        const now = new Date(getStandardFormattedDateTime());
+        const datetimeWhenPeriodShouldEnd = new Date(this.ends);
+
+         return isAfter(now, datetimeWhenPeriodShouldEnd);
+    };
+
+    async insert(): Promise<string> {
+        const checkIfUserHasNoActivePeriods = await PeriodRecord.getActual(this.userId);
+        if (checkIfUserHasNoActivePeriods !==null ) {
+            throw new Error('User already has an active period. You need to close it before inserting a new one.');
+        }
+
+        await pool.execute("INSERT INTO `periods` (`id`, `userId`, `isActive`, `starts`, `ends`, `budgetAmount`, `paymentsAmount`, `savingsAmount`, `freeCashAmount`, `createdAt`) VALUES (:id, :userId, :isActive, :starts, :ends, :budgetAmount, :paymentsAmount, :savingsAmount, :freeCashAmount, :createdAt)", this);
+
+        return this.id;
+    };
+
+    async delete(): Promise<void> {
+        if (!this.id) {
+            throw new Error('Error while deleting: given record has no ID!');
+        }
+
+        const result = await pool.execute("DELETE FROM `periods` WHERE `id` = :id AND `userId` = :userId", this);
+
+        if ((result[0] as ResultSetHeader).affectedRows === 0) {
+            throw new Error('Error while deleting, number of affected rows is 0.');
+        }
+
+    };
 
 }
