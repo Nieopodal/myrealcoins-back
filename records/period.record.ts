@@ -77,7 +77,7 @@ export class PeriodRecord implements PeriodEntity {
     };
 
     static async getAll(userId: string): Promise<PeriodRecord[]> {
-        const [results] = await pool.execute("SELECT * FROM `periods` WHERE `userId` = :userId", {
+        const [results] = await pool.execute("SELECT * FROM `periods` WHERE `userId` = :userId ORDER BY `createdAt` DESC", {
             userId,
         }) as PeriodRecordResults;
 

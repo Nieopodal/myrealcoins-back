@@ -130,7 +130,6 @@ test('OperationRecord.update changes data in database.', async () => {
     expect(op.lat).toBe(54.34342);
     expect(op.lon).toBe(34.34234);
 
-
     await op.delete();
 });
 

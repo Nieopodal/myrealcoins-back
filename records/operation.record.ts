@@ -110,7 +110,7 @@ export class OperationRecord implements OperationEntity {
     };
 
     static async getAll(description: string, userId: string): Promise<OperationEntity[]> {
-        const [results] = await pool.execute("SELECT * FROM `operations` WHERE `description` LIKE :search AND `userId` = :userId", {
+        const [results] = await pool.execute("SELECT * FROM `operations` WHERE `description` LIKE :search AND `userId` = :userId ORDER BY `createdAt` DESC", {
             search: `%${description}%`,
             userId,
         }) as OperationRecordResults;
