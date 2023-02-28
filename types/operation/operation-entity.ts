@@ -1,8 +1,9 @@
 import {OperationType} from "./operation-type";
 import {PaymentCategory, PaymentSubcategory} from "./payment-category";
 
-export interface NewOperationEntity extends Omit<OperationEntity, 'id'> {
+export interface NewOperationEntity extends Omit<OperationEntity, 'id' | 'createdAt'> {
     id?: string;
+    createdAt?: string;
 }
 
 
@@ -19,10 +20,12 @@ export interface OperationEntity {
     imgUrl?: string;
     lat?: number;
     lon?: number;
+    createdAt: string;
 }
 
-export interface NewPaymentEntity extends Omit<PaymentEntity, 'id'> {
+export interface NewPaymentEntity extends Omit<PaymentEntity, 'id' | 'createdAt'> {
     id?: string;
+    createdAt?: string;
 }
 
 export interface PaymentEntity extends Omit<OperationEntity, 'category' | 'subcategory' > {
@@ -32,6 +35,7 @@ export interface PaymentEntity extends Omit<OperationEntity, 'category' | 'subca
 
 export interface NotAPaymentEntity extends Omit<OperationEntity, 'category' | 'subcategory' | 'imgUrl' | 'lat' | 'lon'> {}
 
-export interface NewNotAPaymentEntity extends Omit<NotAPaymentEntity, 'id'> {
+export interface NewNotAPaymentEntity extends Omit<NotAPaymentEntity, 'id' | 'createdAt'> {
     id?: string;
+    createdAt?: string;
 }

@@ -16,7 +16,21 @@ const defaultPaymentObj: NewPaymentEntity = {
     lon: 49.34342,
 };
 
+const defaultOperationEntity = new OperationRecord({
+    id: '[TEST]',
+    userId: "testUserId",
+    type: 2,
+    description: 'test description',
+    isRepetitive: false,
+    amount: 99,
+});
+
+beforeAll(async () => {
+    await defaultOperationEntity.insert();
+});
+
 afterAll(async () => {
+    await defaultOperationEntity.delete();
     await pool.end();
 });
 

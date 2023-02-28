@@ -9,6 +9,7 @@ import {
 import {ValidationError} from "../utils/error";
 import {pool} from "../utils/db";
 import {FieldPacket, ResultSetHeader} from "mysql2";
+import {getStandardFormattedDateTime} from "../utils/datetime-handlers";
 
 type OperationRecordResults = [OperationEntity[], FieldPacket[]];
 
@@ -25,6 +26,7 @@ export class OperationRecord implements OperationEntity {
     imgUrl?: string;
     lat?: number;
     lon?: number;
+    createdAt: string;
 
     constructor(obj: NewOperationEntity) {
 
@@ -36,16 +38,17 @@ export class OperationRecord implements OperationEntity {
 
         this.id = obj.id ?? uuid();
         this.userId =  obj.userId;
-        this.periodId =  obj.periodId;
+        this.periodId =  obj.periodId ?? null;
         this.type =  obj.type;
         this.isRepetitive = Boolean(obj.isRepetitive);
         this.amount =  Number(obj.amount.toFixed(2));
-        this.category =  obj.category;
-        this.subcategory =  obj.subcategory;
-        this.description =  obj.description;
-        this.imgUrl =  obj.imgUrl;
-        this.lat =  obj.lat;
-        this.lon =  obj.lon;
+        this.category =  obj.category ?? null;
+        this.subcategory =  obj.subcategory ?? null;
+        this.description =  obj.description ?? null;
+        this.imgUrl =  obj.imgUrl ?? null;
+        this.lat =  obj.lat ?? null;
+        this.lon =  obj.lon ?? null;
+        this.createdAt = obj.createdAt ? getStandardFormattedDateTime(new Date(obj.createdAt)) : getStandardFormattedDateTime();
     }
 
     private validateEveryNewOperation(obj: NewOperationEntity) {
@@ -117,8 +120,7 @@ export class OperationRecord implements OperationEntity {
 
     async insert(): Promise<string> {
 
-        await pool.execute("INSERT INTO `operations` (`id`, `userId`, `periodId`, `type`, `category`, `subcategory`, `description`, `isRepetitive`, `amount`, `imgUrl`, `lat`, `lon`) VALUES (:id, :userId, :periodId, :type, :category, :subcategory, :description, :isRepetitive, :amount, :imgUrl, :lat, :lon)", this);
-
+        await pool.execute("INSERT INTO `operations` (`id`, `userId`, `periodId`, `type`, `category`, `subcategory`, `description`, `isRepetitive`, `amount`, `imgUrl`, `lat`, `lon`, `createdAt`) VALUES (:id, :userId, :periodId, :type, :category, :subcategory, :description, :isRepetitive, :amount, :imgUrl, :lat, :lon, :createdAt)", this);
 
         return this.id;
     };
