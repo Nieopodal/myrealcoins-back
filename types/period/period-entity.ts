@@ -1,7 +1,8 @@
-export interface NewPeriodEntity extends Omit<PeriodEntity, 'id' | 'starts' | 'ends'> {
+export interface NewPeriodEntity extends Omit<PeriodEntity, 'id' | 'starts' | 'ends' | 'createdAt'> {
     id?: string;
     starts?: string;
     ends?: string;
+    createdAt? : string;
 }
 
 export interface PeriodEntity {
@@ -14,5 +15,5 @@ export interface PeriodEntity {
     paymentsAmount: number;
     savingsAmount: number;
     freeCashAmount: number;
-    createdAt?: string;
+    createdAt: string;
 }
