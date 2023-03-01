@@ -3,6 +3,7 @@ import cors from 'cors';
 import 'express-async-errors';
 import {handleError} from "./utils/error";
 import {config} from "./config/config";
+import {operationRouter} from "./routers/operation.router";
 
 const app = express();
 
@@ -13,11 +14,7 @@ app
     .use(express.json());
 
 app
-    .get('/', async (req, res) => {
-        res.json({
-            status: 'ok',
-        });
-});
+    .use('/operation', operationRouter);
 
 app.use(handleError);
 
