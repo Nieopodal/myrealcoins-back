@@ -49,11 +49,14 @@ afterAll(async () => {
     await secondTestPeriod.delete();
 
     const thirdPeriodObj = await PeriodRecord.getOne('[TEST]3', '[TEST]3');
-    await thirdPeriodObj.delete();
-
+    if(thirdPeriodObj) {
+        await thirdPeriodObj.delete();
+    }
     const fourthPeriodObj = await PeriodRecord.getOne('[TEST]4', '[TEST]4');
-    await fourthPeriodObj.delete();
+    if(thirdPeriodObj) {
 
+        await fourthPeriodObj.delete();
+    }
     await pool.end();
 });
 
@@ -127,7 +130,6 @@ test('PeriodRecord.changeBudgetOperation throws when given amount is greater tha
 
 test('PeriodRecord.addPaymentOperation reduces freeCashAmount and increases paymentsAmount.', async () => {
     const per = await PeriodRecord.getOne('[TEST]2', 'testUserId');
-
     const predictedFreeCashAmount = per.freeCashAmount - 1;
     const predictedPaymentsAmount = per.paymentsAmount + 1;
     await per.addPaymentOperation(-1);
@@ -139,13 +141,11 @@ test('PeriodRecord.addPaymentOperation reduces freeCashAmount and increases paym
 test('PeriodRecord.addPaymentOperation throws when given amount is greater than freeCashAmount or is incorrect.', async () => {
     const per = await PeriodRecord.getOne('[TEST]2', 'testUserId');
     await expect(async () => await per.addPaymentOperation(1)).rejects.toThrow('Given amount should be smaller than 0.');
-
     await expect(async () => await per.addPaymentOperation(-99999999999)).rejects.toThrow('Kwota operacji przewyższa sumę dostępnych środków.');
 });
 
 test('PeriodRecord.addToSavingsOperation reduces freeCashAmount and increases savingsAmount.', async () => {
     const per = await PeriodRecord.getOne('[TEST]2', 'testUserId');
-
     const predictedFreeCashAmount = per.freeCashAmount - 1;
     const predictedSavingsAmount = per.savingsAmount + 1;
     await per.addToSavingsOperation(-1);
@@ -157,13 +157,11 @@ test('PeriodRecord.addToSavingsOperation reduces freeCashAmount and increases sa
 test('PeriodRecord.addToSavingsOperation throws when given amount is greater than freeCashAmount or is incorrect.', async () => {
     const per = await PeriodRecord.getOne('[TEST]2', 'testUserId');
     await expect(async () => await per.addToSavingsOperation(1)).rejects.toThrow('Given amount should be smaller than 0.');
-
     await expect(async () => await per.addToSavingsOperation(-99999999999)).rejects.toThrow('Kwota operacji przewyższa sumę dostępnych środków.');
 });
 
 test('PeriodRecord.addFromSavingsOperation reduces savingsAmount and increases freeCashAmount.', async () => {
     const per = await PeriodRecord.getOne('[TEST]2', 'testUserId');
-
     const predictedFreeCashAmount = per.freeCashAmount + 1;
     const predictedSavingsAmount = per.savingsAmount - 1;
     await per.addFromSavingsOperation(1);
@@ -175,14 +173,12 @@ test('PeriodRecord.addFromSavingsOperation reduces savingsAmount and increases f
 test('PeriodRecord.addFromSavingsOperation throws when given amount is greater than freeCashAmount or is incorrect.', async () => {
     const per = await PeriodRecord.getOne('[TEST]2', 'testUserId');
     await expect(async () => await per.addFromSavingsOperation(-1)).rejects.toThrow('Given amount should be greater than 0.');
-
     await expect(async () => await per.addFromSavingsOperation(99999999999)).rejects.toThrow('Kwota operacji przewyższa sumę dostępnych środków.');
 });
 
 test(`PeriodRecord.getActual returns user's active period.`, async () => {
 
     const actualPer = await PeriodRecord.getActual('testUserId');
-
     expect(actualPer).toBeDefined();
     expect(actualPer.id).toBe('[TEST]2');
     expect(actualPer.userId).toBe('testUserId');
@@ -228,7 +224,6 @@ test('PeriodRecord.insert inserts into database and returns an ID.', async () =>
 
     const perId = await per.insert();
     expect(perId).toBe(per.id);
-
     const foundedPer = await PeriodRecord.getOne(per.id, per.userId);
     expect(foundedPer).toBeDefined();
 });
@@ -287,7 +282,6 @@ test('PeriodRecord.reversePaymentOperation can reverse effects of given operatio
     });
 
     const paymentAmount = -1;
-
     await per.insert();
     await per.addPaymentOperation(paymentAmount);
 

@@ -6,8 +6,8 @@ import {BasicNeeds, OperationType, PaymentCategory} from "../../types";
 import {pool} from "../../utils/db";
 
 const defaultOperationRecord = new OperationRecord({
-    userId: "test-user-id",
-    periodId: "test-period-id",
+    userId: "test-user-id6",
+    periodId: "test-period-id6",
     category: PaymentCategory.BasicNeeds,
     subcategory: BasicNeeds.Supermarket,
     description: "user-description",
@@ -20,8 +20,8 @@ const defaultOperationRecord = new OperationRecord({
 });
 
 const firstTestPeriod = new PeriodRecord({
-    id: "[TEST]",
-    userId: "testUserId",
+    id: "[TEST2]6",
+    userId: "testUserId6",
     isActive: true,
     starts: "2023-02-01 00:00:00",
     ends: "2023-02-28 23:59:59",
@@ -38,13 +38,12 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    await firstTestPeriod.delete();
-    await defaultOperationRecord.delete();
-    await pool.end();
+        await defaultOperationRecord.delete();
+        await firstTestPeriod.delete();
+        await pool.end();
 });
 
 test('ReverseOperationHandler can reverse operations.', async () => {
-
     const actualPeriod = await PeriodRecord.getActual(firstTestPeriod.userId);
     const foundOperation = await OperationRecord.getOne(defaultOperationRecord.id, defaultOperationRecord.userId);
 
@@ -56,5 +55,4 @@ test('ReverseOperationHandler can reverse operations.', async () => {
 
     expect(freeCashAmount).toBe(modifiedActualPeriod.freeCashAmount + foundOperationAmount);
     expect(paymentsAmount).toBe(modifiedActualPeriod.paymentsAmount - foundOperationAmount);
-
 });

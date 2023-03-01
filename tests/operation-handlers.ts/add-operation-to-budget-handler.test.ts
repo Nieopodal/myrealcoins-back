@@ -5,8 +5,8 @@ import {AddOperationToBudgetHandler} from "../../utils/add-operation-to-budget-h
 import {pool} from "../../utils/db";
 
 const firstTestPeriod = new PeriodRecord({
-    id: "[TEST]",
-    userId: "testUserId",
+    id: "[TEST]5",
+    userId: "testUserId5",
     isActive: true,
     starts: "2023-02-01 00:00:00",
     ends: "2023-02-28 23:59:59",
@@ -18,8 +18,8 @@ const firstTestPeriod = new PeriodRecord({
 });
 
 const defaultOperationRecord = new OperationRecord({
-    userId: "test-user-id",
-    periodId: "test-period-id",
+    userId: "test-user-id5",
+    periodId: "test-period-id5",
     category: PaymentCategory.BasicNeeds,
     subcategory: BasicNeeds.Supermarket,
     description: "user-description",
@@ -37,8 +37,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    await firstTestPeriod.delete();
     await defaultOperationRecord.delete();
+    await firstTestPeriod.delete();
     await pool.end();
 });
 
