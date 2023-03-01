@@ -1,5 +1,5 @@
-import {BasicNeeds, NewNotAPaymentEntity, NewPaymentEntity, OperationType, PaymentCategory} from "../types";
-import {OperationRecord} from "../records/operation.record";
+import {BasicNeeds, NewNotAPaymentEntity, NewPaymentEntity, OperationType, PaymentCategory} from "../../types";
+import {OperationRecord} from "../../records/operation.record";
 
 const defaultNotAPaymentObj: NewNotAPaymentEntity = {
     userId: 'test-user-id',

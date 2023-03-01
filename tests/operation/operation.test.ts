@@ -1,6 +1,6 @@
-import {Additional, BasicNeeds, NewPaymentEntity, OperationType, PaymentCategory} from "../types";
-import {OperationRecord} from "../records/operation.record";
-import {pool} from "../utils/db";
+import {Additional, BasicNeeds, NewPaymentEntity, OperationType, PaymentCategory} from "../../types";
+import {OperationRecord} from "../../records/operation.record";
+import {pool} from "../../utils/db";
 
 const defaultPaymentObj: NewPaymentEntity = {
     userId: "test-user-id",

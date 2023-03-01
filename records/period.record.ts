@@ -94,7 +94,7 @@ export class PeriodRecord implements PeriodEntity {
 
     async addPaymentOperation(amount: number): Promise<void> {
 
-        if(amount > 0) {
+        if(amount >= 0) {
             throw new Error('Given amount should be smaller than 0.');
         }
         if (this.freeCashAmount < amount * -1) {
@@ -106,6 +106,20 @@ export class PeriodRecord implements PeriodEntity {
 
         await this.update();
     };
+
+    async reversePaymentOperation(amount: number): Promise<void> {
+        if(amount >= 0) {
+            throw new Error('Given amount should be smaller than 0.');
+        }
+        if (this.paymentsAmount < amount * -1) {
+            throw new ValidationError('Kwota operacji przewyższa sumę dostępnych środków.');
+        }
+
+        this.freeCashAmount += Number((amount*-1).toFixed(2));
+        this.paymentsAmount += Number(amount.toFixed(2));
+
+        await this.update();
+    }
 
     async addToSavingsOperation(amount: number): Promise<void> {
         if(amount > 0) {
@@ -198,7 +212,6 @@ export class PeriodRecord implements PeriodEntity {
         if ((result[0] as ResultSetHeader).affectedRows === 0) {
             throw new Error('Error while deleting, number of affected rows is 0.');
         }
-
     };
 
 }

@@ -96,7 +96,7 @@ export class OperationRecord implements OperationEntity {
         }
     };
 
-    static async getOne(id: string, userId: string): Promise<OperationEntity | null> {
+    static async getOne(id: string, userId: string): Promise<OperationRecord | null> {
         const [results] = await pool.execute("SELECT * FROM `operations` WHERE id = :id AND `userId` = :userId", {
             id,
             userId
@@ -109,7 +109,7 @@ export class OperationRecord implements OperationEntity {
         return results.length === 0 ? null : new OperationRecord(results[0]);
     };
 
-    static async getAll(description: string, userId: string): Promise<OperationEntity[]> {
+    static async getAll(description: string, userId: string): Promise<OperationRecord[]> {
         const [results] = await pool.execute("SELECT * FROM `operations` WHERE `description` LIKE :search AND `userId` = :userId ORDER BY `createdAt` DESC", {
             search: `%${description}%`,
             userId,
@@ -125,7 +125,7 @@ export class OperationRecord implements OperationEntity {
         return this.id;
     };
 
-    async delete(): Promise<void> {
+    async delete(): Promise<boolean> {
         if (!this.id) {
             throw new Error('Error while deleting: given record has no ID!');
         }
@@ -138,6 +138,8 @@ export class OperationRecord implements OperationEntity {
         if ((result[0] as ResultSetHeader).affectedRows === 0) {
             throw new Error('Error while deleting, number of affected rows is 0.');
         }
+
+        return true;
     }
 
     async update(): Promise<string> {
@@ -145,19 +147,7 @@ export class OperationRecord implements OperationEntity {
             throw new Error('Error while updating: given record has no ID!');
         }
 
-        const result = await pool.execute("UPDATE `operations` SET `type` = :type, `category` = :category, `subcategory` = :subcategory, `description` = :description, `isRepetitive` = :isRepetitive, `amount` = :amount, `imgUrl` = :imgUrl, `lat` = :lat, `lon` = :lon WHERE `id` = :id AND `userId` = :userId", {
-            id: this.id,
-            userId: this.userId,
-            type: this.type,
-            category: this.category,
-            subcategory: this.subcategory,
-            description: this.description,
-            isRepetitive: this.isRepetitive,
-            amount: this.amount,
-            imgUrl: this.imgUrl,
-            lat: this.lat,
-            lon: this.lon,
-        });
+        const result = await pool.execute("UPDATE `operations` SET `type` = :type, `category` = :category, `subcategory` = :subcategory, `description` = :description, `isRepetitive` = :isRepetitive, `amount` = :amount, `imgUrl` = :imgUrl, `lat` = :lat, `lon` = :lon WHERE `id` = :id AND `userId` = :userId", this);
 
         if ((result[0] as ResultSetHeader).affectedRows === 0) {
             throw new Error('Error while updating, number of affected rows is 0.');

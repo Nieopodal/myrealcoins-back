@@ -1,6 +1,6 @@
-import {PeriodRecord} from "../records/period.record";
-import {NewPeriodEntity} from "../types";
-import {getFirstAndLastDateOfActualMonth} from "../utils/datetime-handlers";
+import {PeriodRecord} from "../../records/period.record";
+import {NewPeriodEntity} from "../../types";
+import {getFirstAndLastDateOfActualMonth} from "../../utils/datetime-handlers";
 
 jest
     .spyOn(PeriodRecord.prototype, 'initUserBudgetAmount')

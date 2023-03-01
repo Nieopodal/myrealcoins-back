@@ -1,8 +1,8 @@
 import {add} from "date-fns";
-import {pool} from "../utils/db";
-import {PeriodRecord} from "../records/period.record";
-import {NewPeriodEntity} from "../types";
-import {getStandardFormattedDateTime} from "../utils/datetime-handlers";
+import {pool} from "../../utils/db";
+import {PeriodRecord} from "../../records/period.record";
+import {NewPeriodEntity} from "../../types";
+import {getStandardFormattedDateTime} from "../../utils/datetime-handlers";
 
 const firstTestPeriod = new PeriodRecord({
     id: "[TEST]",
@@ -32,11 +32,11 @@ const secondTestPeriod = new PeriodRecord({
 
 const defaultFourthPeriodObj: NewPeriodEntity = {
     userId: "[TEST]4",
-    budgetAmount: 0,
-    freeCashAmount: 0,
+    budgetAmount: 500,
+    freeCashAmount: 100,
     isActive: false,
-    paymentsAmount: 0,
-    savingsAmount: 0
+    paymentsAmount: 100,
+    savingsAmount: 100
 };
 
 beforeAll(async () => {
@@ -274,6 +274,35 @@ test('PeriodRecord.delete removes record from database.', async () => {
     await per.delete();
     const foundAfterDelete = await PeriodRecord.getOne(per.id, per.userId);
     expect(foundAfterDelete).toBeNull();
+});
+
+test('PeriodRecord.reversePaymentOperation can reverse effects of given operation.', async () => {
+    const per = new PeriodRecord({
+        ...defaultFourthPeriodObj,
+        userId: '[TEST]5'
+    });
+
+    const perToCompare = new PeriodRecord({
+        ...per,
+    });
+
+    const paymentAmount = -1;
+
+    await per.insert();
+    await per.addPaymentOperation(paymentAmount);
+
+    const perAfterPayment = await PeriodRecord.getOne(per.id, per.userId);
+
+    expect(perAfterPayment.freeCashAmount).toBe(perToCompare.freeCashAmount + paymentAmount);
+    expect(perAfterPayment.paymentsAmount).toBe(perToCompare.paymentsAmount - paymentAmount);
+
+    await perAfterPayment.reversePaymentOperation(paymentAmount);
+
+    const reversedPer = await PeriodRecord.getOne(perAfterPayment.id, perAfterPayment.userId);
+    expect(reversedPer.freeCashAmount).toBe(perToCompare.freeCashAmount);
+    expect(reversedPer.paymentsAmount).toBe(perToCompare.paymentsAmount);
+
+    await reversedPer.delete();
 });
 
 
