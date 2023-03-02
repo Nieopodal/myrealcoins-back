@@ -133,6 +133,32 @@ test('OperationRecord.update changes data in database.', async () => {
     await op.delete();
 });
 
+test(`OperationRecord.findPeriodOperations should find all operations of given user's period`, async () => {
+
+    const defaultOperationObj = {
+        ...defaultPaymentObj,
+        userId: '[TEST-USER]5',
+        periodId: '[TEST-PERIOD]5',
+    };
+
+    const operationOne = new OperationRecord({
+       ...defaultOperationObj,
+    });
+    const operationTwo = new OperationRecord({
+        ...defaultOperationObj,
+    });
+
+    await operationOne.insert();
+    await operationTwo.insert();
+    const foundOperations = await OperationRecord.findPeriodOperations(defaultOperationObj.periodId, defaultOperationObj.userId);
+
+    expect(foundOperations).toBeDefined();
+    expect(foundOperations.length).toBe(2);
+
+    await operationOne.delete();
+    await operationTwo.delete();
+});
+
 
 
 

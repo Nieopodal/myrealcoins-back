@@ -118,6 +118,15 @@ export class OperationRecord implements OperationEntity {
         return results.map(obj => new OperationRecord(obj));
     };
 
+    static async findPeriodOperations(periodId: string, userId: string): Promise<OperationRecord[]> {
+        const [results] = await pool.execute("SELECT * FROM `operations` WHERE `periodId` = :periodId AND `userId` = :userId ORDER BY `createdAt` DESC", {
+            periodId,
+            userId,
+        }) as OperationRecordResults;
+
+        return results.map(obj => new OperationRecord(obj));
+    };
+
     async insert(): Promise<string> {
 
         await pool.execute("INSERT INTO `operations` (`id`, `userId`, `periodId`, `type`, `category`, `subcategory`, `description`, `isRepetitive`, `amount`, `imgUrl`, `lat`, `lon`, `createdAt`) VALUES (:id, :userId, :periodId, :type, :category, :subcategory, :description, :isRepetitive, :amount, :imgUrl, :lat, :lon, :createdAt)", this);
