@@ -1,56 +1,41 @@
 import {Request, Response, Router} from "express";
 import {OperationRecord} from "../records/operation.record";
-import {ErrorResponse, SuccessResponse} from "../types";
-
-import {NewOperationEntity, OperationEntity} from "../types";
+import {NewOperationEntity} from "../types";
 import {PeriodRecord} from "../records/period.record";
 import {AddOperationToBudgetHandler} from "../utils/add-operation-to-budget-handler";
 import {ReverseOperationHandler} from "../utils/reverse-operation-handler";
+import {sendErrorJsonHandler, sendSuccessJsonHandler} from "../utils/json-response-handlers";
 
 export const user = {
     id: '[test-user-id]',
-};
-// @TODO remember to remove this mock when UserRecord is ready.
+};  // @TODO remember to remove this mock when UserRecord is ready.
 
 export const operationRouter = Router()
 
-    .get('/search/description?', async (req:Request, res: Response) => {
-        try{
+    .get('/search/description?', async (req: Request, res: Response) => {
+        try {
             const operationList = await OperationRecord.getAll(req.params.description ?? '', user.id);
+            sendSuccessJsonHandler(res, operationList);
 
-            res.json({
-                success: true,
-                payload: operationList,
-            } as SuccessResponse<OperationEntity[]>);
-
-        } catch(e) {
-            res.json({
-                success: false,
-                error: e.message,
-            } as ErrorResponse);
+        } catch (e) {
+            sendErrorJsonHandler(res, e.message);
         }
     })
 
     .get('/:id', async (req: Request, res: Response) => {
-        try{
+        try {
             const operation = await OperationRecord.getOne(req.params.id, user.id);
+            sendSuccessJsonHandler(res, operation);
 
-            res.json({
-                success: true,
-                payload: operation,
-            } as SuccessResponse<OperationEntity>);
 
-        } catch(e) {
-            res.json({
-                success: false,
-                error: e.message,
-            } as ErrorResponse);
+        } catch (e) {
+            sendErrorJsonHandler(res, e.message);
         }
     })
 
-    .post('/:id', async (req: Request, res: Response) => {
+    .post('/', async (req: Request, res: Response) => {
 
-        try{
+        try {
             const actualPeriod = await PeriodRecord.getActual(user.id);
             const newOperation = new OperationRecord({
                 ...req.params,
@@ -59,23 +44,16 @@ export const operationRouter = Router()
 
             await AddOperationToBudgetHandler(newOperation, actualPeriod);
             const newOperationId = await newOperation.insert();
+            sendSuccessJsonHandler(res, newOperationId);
 
-            res.json({
-                success: true,
-                payload: newOperationId,
-            } as SuccessResponse<string>);
-
-        } catch(e) {
-            res.json({
-                success: false,
-                error: e.message,
-            } as ErrorResponse);
+        } catch (e) {
+            sendErrorJsonHandler(res, e.message);
         }
     })
 
     .put('/:id', async (req: Request, res: Response) => {
 
-        try{
+        try {
             const actualPeriod = await PeriodRecord.getActual(user.id);
             const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
 
@@ -87,38 +65,25 @@ export const operationRouter = Router()
             } as NewOperationEntity);
 
             const modifiedId = await editedOperation.update();
+            sendSuccessJsonHandler(res, modifiedId);
 
-            res.json({
-                success: true,
-                payload: modifiedId,
-            } as SuccessResponse<string>);
-        } catch(e) {
-            res.json({
-                success: false,
-                error: e.message,
-            } as ErrorResponse);
+        } catch (e) {
+            sendErrorJsonHandler(res, e.message);
         }
     })
 
     .delete('/:id', async (req: Request, res: Response) => {
-        try{
+        try {
             const actualPeriod = await PeriodRecord.getActual(user.id);
             const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
 
             await ReverseOperationHandler(foundOperation, actualPeriod);
             const isRemoved = await foundOperation.delete();
+            sendSuccessJsonHandler(res, isRemoved);
 
-            res.json({
-                success: true,
-                payload: isRemoved,
-            } as SuccessResponse<boolean>);
-
-        } catch(e) {
-            res.json({
-                success: false,
-                error: e.message,
-            } as ErrorResponse);
+        } catch (e) {
+            sendErrorJsonHandler(res, e.message);
         }
-    })
+    });
 
 
