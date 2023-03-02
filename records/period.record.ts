@@ -1,10 +1,10 @@
 import {v4 as uuid} from 'uuid';
+import {FieldPacket, ResultSetHeader} from "mysql2";
+import {isAfter} from "date-fns";
 import {NewPeriodEntity, PeriodEntity} from "../types";
 import {getFirstAndLastDateOfActualMonth, getStandardFormattedDateTime} from "../utils/datetime-handlers";
 import {pool} from "../utils/db";
-import {FieldPacket, ResultSetHeader} from "mysql2";
 import {ValidationError} from "../utils/error";
-import {isAfter} from "date-fns";
 
 type PeriodRecordResults = [PeriodEntity[], FieldPacket[]];
 
@@ -94,7 +94,7 @@ export class PeriodRecord implements PeriodEntity {
 
     async addPaymentOperation(amount: number): Promise<void> {
 
-        if(amount >= 0) {
+        if (amount >= 0) {
             throw new Error('Given amount should be smaller than 0.');
         }
         if (this.freeCashAmount < amount * -1) {
@@ -102,34 +102,34 @@ export class PeriodRecord implements PeriodEntity {
         }
 
         this.freeCashAmount += Number(amount.toFixed(2));
-        this.paymentsAmount += Number((amount*-1).toFixed(2));
+        this.paymentsAmount += Number((amount * -1).toFixed(2));
 
         await this.update();
     };
 
     async reversePaymentOperation(amount: number): Promise<void> {
-        if(amount >= 0) {
+        if (amount >= 0) {
             throw new Error('Given amount should be smaller than 0.');
         }
         if (this.paymentsAmount < amount * -1) {
             throw new ValidationError('Kwota operacji przewyższa sumę dostępnych środków.');
         }
 
-        this.freeCashAmount += Number((amount*-1).toFixed(2));
+        this.freeCashAmount += Number((amount * -1).toFixed(2));
         this.paymentsAmount += Number(amount.toFixed(2));
 
         await this.update();
     }
 
     async addToSavingsOperation(amount: number): Promise<void> {
-        if(amount > 0) {
+        if (amount > 0) {
             throw new Error('Given amount should be smaller than 0.');
         }
         if (this.freeCashAmount < amount * -1) {
             throw new ValidationError('Kwota operacji przewyższa sumę dostępnych środków.');
         }
         this.freeCashAmount += Number(amount.toFixed(2));
-        this.savingsAmount += Number((amount*-1).toFixed(2));
+        this.savingsAmount += Number((amount * -1).toFixed(2));
 
         await this.update();
     };
@@ -142,20 +142,20 @@ export class PeriodRecord implements PeriodEntity {
             throw new ValidationError('Kwota operacji przewyższa sumę dostępnych środków.');
         }
 
-        this.savingsAmount += Number((amount*-1).toFixed(2));
+        this.savingsAmount += Number((amount * -1).toFixed(2));
         this.freeCashAmount += Number(amount.toFixed(2));
 
         await this.update();
     };
 
     async changeBudgetOperation(amount: number): Promise<void> {
-        if(amount < 0) {
+        if (amount < 0) {
             if (this.freeCashAmount < amount * -1 || this.budgetAmount < amount * -1) {
                 throw new ValidationError('Kwota operacji przewyższa sumę dostępnych środków.');
             }
 
         } else if (amount > 0) {
-            if((this.budgetAmount + amount) > 999999999.99) {
+            if ((this.budgetAmount + amount) > 999999999.99) {
                 throw new ValidationError('Przekroczono maksymalną kwotę budżetu wynoszącą 999 999 999.99');
             }
 
@@ -169,11 +169,13 @@ export class PeriodRecord implements PeriodEntity {
         await this.update();
     };
 
-    async addToCushionOperation() {} //@TODO make this working, amount should be -
+    async addToCushionOperation() {
+    } //@TODO make this working, amount should be -
 
-    async addFromCushionOperation() {} //@TODO make this working, amount should be +
+    async addFromCushionOperation() {
+    } //@TODO make this working, amount should be +
 
-    async closePeriod(): Promise<void>{
+    async closePeriod(): Promise<void> {
         if (this.isActive === false) {
             throw new Error('Trying to close period which is already closed.');
         } else if (this.isActive === true) {
@@ -188,12 +190,12 @@ export class PeriodRecord implements PeriodEntity {
         const now = new Date(getStandardFormattedDateTime());
         const datetimeWhenPeriodShouldEnd = new Date(this.ends);
 
-         return isAfter(now, datetimeWhenPeriodShouldEnd);
+        return isAfter(now, datetimeWhenPeriodShouldEnd);
     };
 
     async insert(): Promise<string> {
         const checkIfUserHasNoActivePeriods = await PeriodRecord.getActual(this.userId);
-        if (checkIfUserHasNoActivePeriods !==null ) {
+        if (checkIfUserHasNoActivePeriods !== null) {
             throw new Error('User already has an active period. You need to close it before inserting a new one.');
         }
 

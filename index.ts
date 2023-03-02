@@ -4,6 +4,7 @@ import 'express-async-errors';
 import {handleError} from "./utils/error";
 import {config} from "./config/config";
 import {operationRouter} from "./routers/operation.router";
+import {periodRouter} from "./routers/period.router";
 
 const app = express();
 
@@ -14,7 +15,8 @@ app
     .use(express.json());
 
 app
-    .use('/operation', operationRouter);
+    .use('/operation', operationRouter)
+    .use('/period', periodRouter)
 
 app.use(handleError);
 
