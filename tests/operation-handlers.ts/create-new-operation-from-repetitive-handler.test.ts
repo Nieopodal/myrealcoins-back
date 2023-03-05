@@ -17,13 +17,16 @@ test('createNewOperationFromRepetitiveHandler can get all user`s root repetitive
     });
     await rootOp.insert();
 
-    await createNewOperationsFromRepetitiveHandler(newPeriod.id, newPeriod.userId);
-    const found = await OperationRecord.findPeriodOperations(newPeriod.id, newPeriod.userId);
-    expect(found.length).toBe(1);
-    expect(found[0].periodId).toBe(newPeriod.id);
-    expect(found[0].originId).toBe(rootOp.id);
+    setTimeout(async () => {
+        await createNewOperationsFromRepetitiveHandler(newPeriod.id, newPeriod.userId);
+        const found = await OperationRecord.findPeriodOperations(newPeriod.id, newPeriod.userId);
+        expect(found.length).toBe(1);
+        expect(found[0].periodId).toBe(newPeriod.id);
+        expect(found[0].originId).toBe(rootOp.id);
+        expect(found[0].createdAt).not.toBe(rootOp.createdAt);
 
-    await newPeriod.delete();
-    await rootOp.delete();
-    await found[0].delete();
+        await newPeriod.delete();
+        await rootOp.delete();
+        await found[0].delete();
+    }, 1000);
 });
