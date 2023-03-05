@@ -22,6 +22,17 @@ export const operationRouter = Router()
         }
     })
 
+    .get('/get-period-operations/:periodId', async (req: Request, res: Response) => {
+        try {
+            const operationList = await OperationRecord.findPeriodOperations(req.params.periodId, user.id);
+            sendSuccessJsonHandler(res, operationList);
+
+
+        } catch (e) {
+            sendErrorJsonHandler(res, e.message);
+        }
+    })
+
     .get('/:id', async (req: Request, res: Response) => {
         try {
             const operation = await OperationRecord.getOne(req.params.id, user.id);

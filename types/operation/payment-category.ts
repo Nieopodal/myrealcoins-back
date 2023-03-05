@@ -3,10 +3,11 @@ export enum BasicNeeds {
     HousingFees,
     Health,
     Transport,
-    Children,
+    Baby,
     Animals,
-    Telephone,
+    Communication,
     Other,
+
 }
 
 export enum Additional {

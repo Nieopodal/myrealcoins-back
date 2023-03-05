@@ -17,20 +17,20 @@ export const periodRouter = Router()
         }
     })
 
-    .get('/:id', async (req: Request, res: Response) => {  //this will send found period or null
+    .get('/actual', async (req: Request, res: Response) => {   //this will send actual period or null
         try {
-            const foundPeriod = await PeriodRecord.getOne(req.params.id, user.id);
-            sendSuccessJsonHandler(res, foundPeriod);
+            const actualPeriod = await PeriodRecord.getActual(user.id);
+            sendSuccessJsonHandler(res, actualPeriod);
 
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
     })
 
-    .get('/actual', async (req: Request, res: Response) => {   //this will send actual period or null
+    .get('/:id', async (req: Request, res: Response) => {  //this will send found period or null
         try {
-            const actualPeriod = await PeriodRecord.getActual(user.id);
-            sendSuccessJsonHandler(res, actualPeriod);
+            const foundPeriod = await PeriodRecord.getOne(req.params.id, user.id);
+            sendSuccessJsonHandler(res, foundPeriod);
 
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
@@ -43,14 +43,14 @@ export const periodRouter = Router()
             if (actualPeriod) {
                 if (actualPeriod.checkIfActualPeriodShouldEnd()) {
                     await actualPeriod.closePeriod();
-                    const newPeriod = await insertNewPeriodHandler(req, res);
+                    const newPeriod = await insertNewPeriodHandler(req);
                     sendSuccessJsonHandler(res, newPeriod);
                     return;
                 }
                 sendErrorJsonHandler(res, 'Aktualny okres jeszcze się nie zakończył.');
                 return;
             }
-            const newPeriod = await insertNewPeriodHandler(req, res);
+            const newPeriod = await insertNewPeriodHandler(req);
             sendSuccessJsonHandler(res, newPeriod);
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
