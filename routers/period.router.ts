@@ -4,6 +4,7 @@ import {user} from "./operation.router";    //@TODO remove this when UserRecord 
 import {OperationRecord} from "../records/operation.record";
 import {sendErrorJsonHandler, sendSuccessJsonHandler} from "../utils/json-response-handlers";
 import {insertNewPeriodHandler} from "../utils/insert-new-period-handler";
+import {createNewOperationsFromRepetitiveHandler} from "../utils/create-new-operations-from-repetitive-handler";
 
 export const periodRouter = Router()
 
@@ -44,6 +45,7 @@ export const periodRouter = Router()
                 if (actualPeriod.checkIfActualPeriodShouldEnd()) {
                     await actualPeriod.closePeriod();
                     const newPeriod = await insertNewPeriodHandler(req);
+                    await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
                     sendSuccessJsonHandler(res, newPeriod);
                     return;
                 }
@@ -51,6 +53,7 @@ export const periodRouter = Router()
                 return;
             }
             const newPeriod = await insertNewPeriodHandler(req);
+            await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
             sendSuccessJsonHandler(res, newPeriod);
         } catch (e) {
             sendErrorJsonHandler(res, e.message);

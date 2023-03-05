@@ -21,6 +21,7 @@ export interface OperationEntity {
     lat?: number;
     lon?: number;
     createdAt: string;
+    originId?: string;
 }
 
 export interface NewPaymentEntity extends Omit<PaymentEntity, 'id' | 'createdAt'> {

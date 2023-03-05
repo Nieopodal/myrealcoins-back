@@ -51,6 +51,7 @@ export const operationRouter = Router()
             const newOperation = new OperationRecord({
                 ...req.params,
                 userId: user.id,
+                periodId: actualPeriod.id,
             } as NewOperationEntity);
 
             await AddOperationToBudgetHandler(newOperation, actualPeriod);
@@ -58,6 +59,32 @@ export const operationRouter = Router()
             sendSuccessJsonHandler(res, newOperationId);
 
         } catch (e) {
+            sendErrorJsonHandler(res, e.message);
+        }
+    })
+
+    .post('/repetitive-operation', async (req, res) => {
+        try {
+            const actualPeriod = await PeriodRecord.getActual(user.id);
+            const newRootOperation = new OperationRecord({
+                ...req.params,
+                periodId: '',
+                isRepetitive: true,
+                userId: user.id,
+            } as NewOperationEntity);
+
+            const newActualOperation = new OperationRecord({
+                ...newRootOperation,
+                periodId: actualPeriod.id,
+                originId: newRootOperation.id,
+            });
+
+            await AddOperationToBudgetHandler(newActualOperation, actualPeriod);
+            await newRootOperation.insert();
+            const newOperationId = await newActualOperation.insert();
+            sendSuccessJsonHandler(res, newOperationId);
+
+        } catch(e) {
             sendErrorJsonHandler(res, e.message);
         }
     })

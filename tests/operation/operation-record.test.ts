@@ -206,5 +206,13 @@ test('OperationRecord validates payment coordinates.', () => {
     })).toThrow('Nie można ustalić lokalizacji.');
 });
 
+test('OperationRecord throws when object has originId but is not repetitive.', () => {
+    expect(() => new OperationRecord({
+        ...defaultPaymentObj,
+        isRepetitive: false,
+        originId: 'test',
+    })).toThrow('Operation with origin should be repetitive.');
+});
+
 
 

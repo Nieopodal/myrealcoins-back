@@ -9,5 +9,6 @@ export const insertNewPeriodHandler = async (req: Request): Promise<PeriodRecord
         isActive: true,
     });
     await newPeriod.insert();
+
     return newPeriod;
 };

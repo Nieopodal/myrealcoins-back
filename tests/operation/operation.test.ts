@@ -159,6 +159,30 @@ test(`OperationRecord.findPeriodOperations should find all operations of given u
     await operationTwo.delete();
 });
 
+test(`OperationRecord.findRepetitiveOperations finds all user's repetitive operations`, async () => {
+    const rootOp = new OperationRecord({
+        ...defaultPaymentObj,
+        description: 'test-root-op-1',
+        periodId: null,
+        isRepetitive: true,
+    });
+
+    const secondRootOp = new OperationRecord({
+        ...defaultPaymentObj,
+        description: 'test-root-op-2',
+        periodId: null,
+        isRepetitive: true,
+    });
+
+    await rootOp.insert();
+    await secondRootOp.insert();
+    const found = await OperationRecord.findRepetitiveOperations('test-user-id');
+    expect(found.length).toBe(2);
+    await rootOp.delete();
+    await secondRootOp.delete();
+});
+
+
 
 
 

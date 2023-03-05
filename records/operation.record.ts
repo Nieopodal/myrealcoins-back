@@ -27,6 +27,7 @@ export class OperationRecord implements OperationEntity {
     lat?: number;
     lon?: number;
     createdAt: string;
+    originId?: string;
 
     constructor(obj: NewOperationEntity) {
 
@@ -49,6 +50,7 @@ export class OperationRecord implements OperationEntity {
         this.lat =  obj.lat ?? null;
         this.lon =  obj.lon ?? null;
         this.createdAt = obj.createdAt ? getStandardFormattedDateTime(new Date(obj.createdAt)) : getStandardFormattedDateTime();
+        this.originId = obj.originId ?? null;
     }
 
     private validateEveryNewOperation(obj: NewOperationEntity) {
@@ -72,6 +74,9 @@ export class OperationRecord implements OperationEntity {
         }
         if (obj.description && obj.description.length > 50) {
             throw new ValidationError('Opis powinien być tekstem o maksymalnej długości 50 znaków.');
+        }
+        if (obj.originId && !obj.isRepetitive) {
+            throw new Error('Operation with origin should be repetitive.');
         }
     };
 
@@ -127,9 +132,20 @@ export class OperationRecord implements OperationEntity {
         return results.map(obj => new OperationRecord(obj));
     };
 
+    static async findRepetitiveOperations(userId: string): Promise<OperationRecord[] | null> {
+        if (!userId) {
+            throw new Error('findRepetitiveOperations requires userId.');
+        }
+        const [results] = await pool.execute("SELECT * FROM `operations` WHERE `userId` = :userId AND `isRepetitive` = 1 AND `periodId` IS NULL ORDER BY `createdAt` DESC", {
+            userId,
+        }) as OperationRecordResults;
+
+        return results.map(obj => new OperationRecord(obj));
+    };
+
     async insert(): Promise<string> {
 
-        await pool.execute("INSERT INTO `operations` (`id`, `userId`, `periodId`, `type`, `category`, `subcategory`, `description`, `isRepetitive`, `amount`, `imgUrl`, `lat`, `lon`, `createdAt`) VALUES (:id, :userId, :periodId, :type, :category, :subcategory, :description, :isRepetitive, :amount, :imgUrl, :lat, :lon, :createdAt)", this);
+        await pool.execute("INSERT INTO `operations` (`id`, `userId`, `periodId`, `type`, `category`, `subcategory`, `description`, `isRepetitive`, `amount`, `imgUrl`, `lat`, `lon`, `createdAt`, `originId`) VALUES (:id, :userId, :periodId, :type, :category, :subcategory, :description, :isRepetitive, :amount, :imgUrl, :lat, :lon, :createdAt, :originId)", this);
 
         return this.id;
     };
@@ -149,7 +165,7 @@ export class OperationRecord implements OperationEntity {
         }
 
         return true;
-    }
+    };
 
     async update(): Promise<string> {
         if (!this.id) {
@@ -163,6 +179,5 @@ export class OperationRecord implements OperationEntity {
         }
 
         return this.id;
-    }
-
+    };
 }
