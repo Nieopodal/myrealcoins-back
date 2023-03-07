@@ -16,7 +16,6 @@ export const operationRouter = Router()
         try {
             const operationList = await OperationRecord.getAll(req.params.description ?? '', user.id);
             sendSuccessJsonHandler(res, operationList);
-
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
@@ -26,8 +25,6 @@ export const operationRouter = Router()
         try {
             const operationList = await OperationRecord.findPeriodOperations(req.params.periodId, user.id);
             sendSuccessJsonHandler(res, operationList);
-
-
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
@@ -37,15 +34,12 @@ export const operationRouter = Router()
         try {
             const operation = await OperationRecord.getOne(req.params.id, user.id);
             sendSuccessJsonHandler(res, operation);
-
-
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
     })
 
     .post('/', async (req: Request, res: Response) => {
-
         try {
             const actualPeriod = await PeriodRecord.getActual(user.id);
             const newOperation = new OperationRecord({
@@ -53,11 +47,9 @@ export const operationRouter = Router()
                 userId: user.id,
                 periodId: actualPeriod.id,
             } as NewOperationEntity);
-
             await AddOperationToBudgetHandler(newOperation, actualPeriod);
             const newOperationId = await newOperation.insert();
             sendSuccessJsonHandler(res, newOperationId);
-
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
@@ -68,7 +60,7 @@ export const operationRouter = Router()
             const actualPeriod = await PeriodRecord.getActual(user.id);
             const newRootOperation = new OperationRecord({
                 ...req.params,
-                periodId: '',
+                periodId: null,
                 isRepetitive: true,
                 userId: user.id,
             } as NewOperationEntity);
@@ -78,19 +70,16 @@ export const operationRouter = Router()
                 periodId: actualPeriod.id,
                 originId: newRootOperation.id,
             });
-
             await AddOperationToBudgetHandler(newActualOperation, actualPeriod);
             await newRootOperation.insert();
             const newOperationId = await newActualOperation.insert();
             sendSuccessJsonHandler(res, newOperationId);
-
-        } catch(e) {
+        } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
     })
 
     .put('/:id', async (req: Request, res: Response) => {
-
         try {
             const actualPeriod = await PeriodRecord.getActual(user.id);
             const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
@@ -101,10 +90,8 @@ export const operationRouter = Router()
                 id: foundOperation.id,
                 userId: user.id,
             } as NewOperationEntity);
-
             const modifiedId = await editedOperation.update();
             sendSuccessJsonHandler(res, modifiedId);
-
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
@@ -114,11 +101,9 @@ export const operationRouter = Router()
         try {
             const actualPeriod = await PeriodRecord.getActual(user.id);
             const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
-
             await ReverseOperationHandler(foundOperation, actualPeriod);
             const isRemoved = await foundOperation.delete();
             sendSuccessJsonHandler(res, isRemoved);
-
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }

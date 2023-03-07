@@ -12,7 +12,6 @@ export const periodRouter = Router()
         try {
             const periodList = await PeriodRecord.getAll(user.id);
             sendSuccessJsonHandler(res, periodList);
-
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
@@ -22,7 +21,6 @@ export const periodRouter = Router()
         try {
             const actualPeriod = await PeriodRecord.getActual(user.id);
             sendSuccessJsonHandler(res, actualPeriod);
-
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
@@ -32,7 +30,6 @@ export const periodRouter = Router()
         try {
             const foundPeriod = await PeriodRecord.getOne(req.params.id, user.id);
             sendSuccessJsonHandler(res, foundPeriod);
-
         } catch (e) {
             sendErrorJsonHandler(res, e.message);
         }
@@ -44,7 +41,7 @@ export const periodRouter = Router()
             if (actualPeriod) {
                 if (actualPeriod.checkIfActualPeriodShouldEnd()) {
                     await actualPeriod.closePeriod();
-                    const newPeriod = await insertNewPeriodHandler(req);
+                    const newPeriod = await insertNewPeriodHandler(req, user.id);
                     await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
                     sendSuccessJsonHandler(res, newPeriod);
                     return;
@@ -52,7 +49,7 @@ export const periodRouter = Router()
                 sendErrorJsonHandler(res, 'Aktualny okres jeszcze się nie zakończył.');
                 return;
             }
-            const newPeriod = await insertNewPeriodHandler(req);
+            const newPeriod = await insertNewPeriodHandler(req, user.id);
             await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
             sendSuccessJsonHandler(res, newPeriod);
         } catch (e) {
