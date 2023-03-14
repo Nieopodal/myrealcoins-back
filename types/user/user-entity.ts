@@ -5,4 +5,14 @@ export interface UserEntity {
     name: string;
     financialCushion: number;
     defaultBudgetAmount: number;
+    localizationSource: LocalizationSource;
+    addLocalizationByDefault: boolean;
 }
+
+export enum LocalizationSource {
+    None,
+    UserDevice,
+    Receipt,
+    Address,
+}
+
