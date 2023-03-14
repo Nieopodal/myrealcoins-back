@@ -13,75 +13,84 @@ export const user = {
 export const operationRouter = Router()
 
     .get('/search/description?', async (req: Request, res: Response) => {
-            const operationList = await OperationRecord.getAll(req.params.description ?? '', user.id);
-            sendSuccessJsonHandler(res, operationList);
+        const operationList = await OperationRecord.getAll(req.params.description ?? '', user.id);
+        sendSuccessJsonHandler(res, operationList);
     })
 
     .get('/get-period-operations/:periodId', async (req: Request, res: Response) => {
-            const operationList = await OperationRecord.findPeriodOperations(req.params.periodId, user.id);
-            sendSuccessJsonHandler(res, operationList);
+        const operationList = await OperationRecord.findPeriodOperations(req.params.periodId, user.id);
+        sendSuccessJsonHandler(res, operationList);
     })
 
     .get('/:id', async (req: Request, res: Response) => {
-            const operation = await OperationRecord.getOne(req.params.id, user.id);
-            sendSuccessJsonHandler(res, operation);
+        const operation = await OperationRecord.getOne(req.params.id, user.id);
+        sendSuccessJsonHandler(res, operation);
     })
 
     .post('/', async (req: Request, res: Response) => {
-            const actualPeriod = await PeriodRecord.getActual(user.id);
-            const newOperation = new OperationRecord({
-                ...req.body,
-                userId: user.id,
-                periodId: actualPeriod.id,
-            } as NewOperationEntity);
-            await AddOperationToBudgetHandler(newOperation, actualPeriod);
-            const newOperationId = await newOperation.insert();
-            sendSuccessJsonHandler(res, newOperationId);
+        const actualPeriod = await PeriodRecord.getActual(user.id);
+        const newOperation = new OperationRecord({
+            ...req.body,
+            userId: user.id,
+            periodId: actualPeriod.id,
+        } as NewOperationEntity);
+        await AddOperationToBudgetHandler(newOperation, actualPeriod);
+        const newOperationId = await newOperation.insert();
+        sendSuccessJsonHandler(res, newOperationId);
     })
 
     .post('/repetitive-operation', async (req, res) => {
-            const actualPeriod = await PeriodRecord.getActual(user.id);
-            const newRootOperation = new OperationRecord({
-                ...req.body,
-                periodId: null,
-                isRepetitive: true,
-                userId: user.id,
-            } as NewOperationEntity);
+        const actualPeriod = await PeriodRecord.getActual(user.id);
+        const newRootOperation = new OperationRecord({
+            ...req.body,
+            periodId: null,
+            isRepetitive: true,
+            userId: user.id,
+        } as NewOperationEntity);
 
-            const newActualOperation = new OperationRecord({
-                ...newRootOperation,
-                id: null,
-                periodId: actualPeriod.id,
-                originId: newRootOperation.id,
-            });
-            await AddOperationToBudgetHandler(newActualOperation, actualPeriod);
-            await newRootOperation.insert();
-            const newOperationId = await newActualOperation.insert();
-            sendSuccessJsonHandler(res, newOperationId);
+        const newActualOperation = new OperationRecord({
+            ...newRootOperation,
+            id: null,
+            periodId: actualPeriod.id,
+            originId: newRootOperation.id,
+        });
+        await AddOperationToBudgetHandler(newActualOperation, actualPeriod);
+        await newRootOperation.insert();
+        const newOperationId = await newActualOperation.insert();
+        sendSuccessJsonHandler(res, newOperationId);
     })
 
     .put('/:id', async (req: Request, res: Response) => {
-            const actualPeriod = await PeriodRecord.getActual(user.id);
-            const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
+        const actualPeriod = await PeriodRecord.getActual(user.id);
+        const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
 
-            await ReverseOperationHandler(foundOperation, actualPeriod);
-            const editedOperation = new OperationRecord({
-                ...req.body,
-                id: foundOperation.id,
-                userId: user.id,
-            } as NewOperationEntity);
-            const modifiedId = await editedOperation.update();
-            sendSuccessJsonHandler(res, modifiedId);
+        await ReverseOperationHandler(foundOperation, actualPeriod);
+        const editedOperation = new OperationRecord({
+            ...req.body,
+            id: foundOperation.id,
+            userId: user.id,
+        } as NewOperationEntity);
+        const modifiedId = await editedOperation.update();
+        sendSuccessJsonHandler(res, modifiedId);
     })
 
-    .delete('/:id', async (req: Request, res: Response) => {
-            const actualPeriod = await PeriodRecord.getActual(user.id);
-            const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
-            if (foundOperation.periodId) {
-                await ReverseOperationHandler(foundOperation, actualPeriod);
+    .delete('/:id/:childId?', async (req: Request, res: Response) => {
+        const actualPeriod = await PeriodRecord.getActual(user.id);
+        const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
+
+        if (!foundOperation.periodId) {
+            const childOperation = await OperationRecord.getOne(req.params.childId, user.id);
+            if (!childOperation) {
+                throw new Error(`Could not find child of operation schema.`);
             }
-            const isRemoved = await foundOperation.delete();
-            sendSuccessJsonHandler(res, isRemoved);
+            childOperation.originId = null;
+            childOperation.isRepetitive = false;
+            await childOperation.update();
+        } else {
+            await ReverseOperationHandler(foundOperation, actualPeriod);
+        }
+        const isRemoved = await foundOperation.delete();
+        sendSuccessJsonHandler(res, isRemoved);
     });
 
 

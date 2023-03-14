@@ -38,17 +38,17 @@ export class OperationRecord implements OperationEntity {
         }
 
         this.id = obj.id ?? uuid();
-        this.userId =  obj.userId;
-        this.periodId =  obj.periodId ?? null;
-        this.type =  obj.type;
+        this.userId = obj.userId;
+        this.periodId = obj.periodId ?? null;
+        this.type = obj.type;
         this.isRepetitive = Boolean(obj.isRepetitive);
-        this.amount =  Number(obj.amount.toFixed(2));
-        this.category =  obj.category ?? null;
-        this.subcategory =  obj.subcategory ?? null;
-        this.description =  obj.description ?? null;
-        this.imgUrl =  obj.imgUrl ?? null;
-        this.lat =  obj.lat ?? null;
-        this.lon =  obj.lon ?? null;
+        this.amount = Number(obj.amount.toFixed(2));
+        this.category = obj.category ?? null;
+        this.subcategory = obj.subcategory ?? null;
+        this.description = obj.description ?? null;
+        this.imgUrl = obj.imgUrl ?? null;
+        this.lat = obj.lat ?? null;
+        this.lon = obj.lon ?? null;
         this.createdAt = obj.createdAt ? getStandardFormattedDateTime(new Date(obj.createdAt)) : getStandardFormattedDateTime();
         this.originId = obj.originId ?? null;
     }
@@ -93,10 +93,10 @@ export class OperationRecord implements OperationEntity {
         if (obj.imgUrl && obj.imgUrl.length > 100) {
             throw  new ValidationError('Adres URL zdjęcia powinien być tekstem o długości maksymalnie 100 znaków.');
         }
-        if (obj.lat && typeof obj.lat !=='number') {
+        if (obj.lat && typeof obj.lat !== 'number') {
             throw new ValidationError('Nie można ustalić lokalizacji.');
         }
-        if (obj.lon && typeof obj.lon !=='number') {
+        if (obj.lon && typeof obj.lon !== 'number') {
             throw new ValidationError('Nie można ustalić lokalizacji.');
         }
     };
@@ -172,7 +172,7 @@ export class OperationRecord implements OperationEntity {
             throw new Error('Error while updating: given record has no ID!');
         }
 
-        const result = await pool.execute("UPDATE `operations` SET `type` = :type, `category` = :category, `subcategory` = :subcategory, `description` = :description, `isRepetitive` = :isRepetitive, `amount` = :amount, `imgUrl` = :imgUrl, `lat` = :lat, `lon` = :lon WHERE `id` = :id AND `userId` = :userId", this);
+        const result = await pool.execute("UPDATE `operations` SET `type` = :type, `category` = :category, `subcategory` = :subcategory, `description` = :description, `isRepetitive` = :isRepetitive, `amount` = :amount, `imgUrl` = :imgUrl, `lat` = :lat, `lon` = :lon, `originId` = :originId WHERE `id` = :id AND `userId` = :userId", this);
 
         if ((result[0] as ResultSetHeader).affectedRows === 0) {
             throw new Error('Error while updating, number of affected rows is 0.');
