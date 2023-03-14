@@ -9,65 +9,44 @@ import {createNewOperationsFromRepetitiveHandler} from "../utils/create-new-oper
 export const periodRouter = Router()
 
     .get('/', async (req: Request, res: Response) => {  //this will send all periods
-        try {
-            const periodList = await PeriodRecord.getAll(user.id);
-            sendSuccessJsonHandler(res, periodList);
-        } catch (e) {
-            sendErrorJsonHandler(res, e.message);
-        }
+        const periodList = await PeriodRecord.getAll(user.id);
+        sendSuccessJsonHandler(res, periodList);
     })
 
     .get('/actual', async (req: Request, res: Response) => {   //this will send actual period or null
-        try {
-            const actualPeriod = await PeriodRecord.getActual(user.id);
-            sendSuccessJsonHandler(res, actualPeriod);
-        } catch (e) {
-            sendErrorJsonHandler(res, e.message);
-        }
+        const actualPeriod = await PeriodRecord.getActual(user.id);
+        sendSuccessJsonHandler(res, actualPeriod);
     })
 
     .get('/:id', async (req: Request, res: Response) => {  //this will send found period or null
-        try {
-            const foundPeriod = await PeriodRecord.getOne(req.params.id, user.id);
-            sendSuccessJsonHandler(res, foundPeriod);
-        } catch (e) {
-            sendErrorJsonHandler(res, e.message);
-        }
+        const foundPeriod = await PeriodRecord.getOne(req.params.id, user.id);
+        sendSuccessJsonHandler(res, foundPeriod);
     })
 
     .post('/', async (req: Request, res: Response) => {
-        try {
-            const actualPeriod = await PeriodRecord.getActual(user.id);
-            if (actualPeriod) {
-                if (actualPeriod.checkIfActualPeriodShouldEnd()) {
-                    await actualPeriod.closePeriod();
-                    const newPeriod = await insertNewPeriodHandler(req, user.id);
-                    await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
-                    sendSuccessJsonHandler(res, newPeriod);
-                    return;
-                }
-                sendErrorJsonHandler(res, 'Aktualny okres jeszcze się nie zakończył.');
+        const actualPeriod = await PeriodRecord.getActual(user.id);
+        if (actualPeriod) {
+            if (actualPeriod.checkIfActualPeriodShouldEnd()) {
+                await actualPeriod.closePeriod();
+                const newPeriod = await insertNewPeriodHandler(req, user.id);
+                await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
+                sendSuccessJsonHandler(res, newPeriod);
                 return;
             }
-            const newPeriod = await insertNewPeriodHandler(req, user.id);
-            await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
-            sendSuccessJsonHandler(res, newPeriod);
-        } catch (e) {
-            sendErrorJsonHandler(res, e.message);
+            sendErrorJsonHandler(res, 'Aktualny okres jeszcze się nie zakończył.');
+            return;
         }
+        const newPeriod = await insertNewPeriodHandler(req, user.id);
+        await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
+        sendSuccessJsonHandler(res, newPeriod);
     })
 
     .delete('/:id', async (req: Request, res: Response) => {
-        try {
-            const foundPeriod = await PeriodRecord.getOne(req.params.id, user.id);
-            const periodOperations = await OperationRecord.findPeriodOperations(foundPeriod.id, user.id);
-            for (const operation of periodOperations) {
-                await operation.delete();
-            }
-            await foundPeriod.delete();
-            sendSuccessJsonHandler(res, true);
-
-        } catch (e) {
-            sendErrorJsonHandler(res, e.message);
+        const foundPeriod = await PeriodRecord.getOne(req.params.id, user.id);
+        const periodOperations = await OperationRecord.findPeriodOperations(foundPeriod.id, user.id);
+        for (const operation of periodOperations) {
+            await operation.delete();
         }
+        await foundPeriod.delete();
+        sendSuccessJsonHandler(res, true);
     });
