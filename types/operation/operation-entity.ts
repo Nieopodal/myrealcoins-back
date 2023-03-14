@@ -1,8 +1,9 @@
 import {OperationType} from "./operation-type";
 import {PaymentCategory, PaymentSubcategory} from "./payment-category";
 
-export interface NewOperationEntity extends Omit<OperationEntity, 'id' | 'createdAt'> {
+export interface NewOperationEntity extends Omit<OperationEntity, 'id' | 'createdAt' | 'userId'> {
     id?: string;
+    userId?: string;
     createdAt?: string;
 }
 

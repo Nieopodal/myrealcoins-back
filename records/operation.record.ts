@@ -66,7 +66,7 @@ export class OperationRecord implements OperationEntity {
         if (!obj.amount || typeof obj.amount !== 'number' || obj.amount < -999999999.99 || obj.amount > 999999999.99) {
             throw new ValidationError('Kwota operacji powinna zawierać się w przedziale od -999 999 999,99 do 999 999 999,99.');
         }
-        if (!obj.type || typeof obj.type !== 'number') {
+        if (obj.type < 0 || typeof obj.type !== 'number') {
             throw new ValidationError('Wybrano błędny typ kategorii operacji.');
         }
         if (obj.description && typeof obj.description !== 'string') {
