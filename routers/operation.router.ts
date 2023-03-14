@@ -77,7 +77,9 @@ export const operationRouter = Router()
     .delete('/:id', async (req: Request, res: Response) => {
             const actualPeriod = await PeriodRecord.getActual(user.id);
             const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
-            await ReverseOperationHandler(foundOperation, actualPeriod);
+            if (foundOperation.periodId) {
+                await ReverseOperationHandler(foundOperation, actualPeriod);
+            }
             const isRemoved = await foundOperation.delete();
             sendSuccessJsonHandler(res, isRemoved);
     });
