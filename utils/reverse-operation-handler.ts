@@ -6,7 +6,7 @@ export const ReverseOperationHandler = async (foundOperation: OperationEntity, a
     if (!foundOperation) {
         throw new Error('Operation not found.')
     }
-    switch(foundOperation.type) {
+    switch (foundOperation.type) {
         case OperationType.AddToBudget: {
             await actualPeriod.changeBudgetOperation(foundOperation.amount * -1);
             break;
@@ -20,11 +20,11 @@ export const ReverseOperationHandler = async (foundOperation: OperationEntity, a
             break;
         }
         case OperationType.AddToSavings: {
-            await actualPeriod.addFromSavingsOperation(foundOperation.amount);
+            await actualPeriod.addFromSavingsOperation(foundOperation.amount * -1);
             break;
         }
         case OperationType.AddFromSavings: {
-            await actualPeriod.addToSavingsOperation(foundOperation.amount);
+            await actualPeriod.addToSavingsOperation(foundOperation.amount * -1);
             break;
         }
         case OperationType.AddToCushion: {
@@ -37,6 +37,7 @@ export const ReverseOperationHandler = async (foundOperation: OperationEntity, a
             break;
             //     @TODO need to make this working first
         }
-        default: throw new Error('Incorrect Operation Type.');
+        default:
+            throw new Error('Incorrect Operation Type.');
     }
 };
