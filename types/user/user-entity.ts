@@ -13,6 +13,5 @@ export enum LocalizationSource {
     None,
     UserDevice,
     Receipt,
-    Address,
 }
 

@@ -1,34 +1,20 @@
 import {Request, Response, Router} from "express";
-import {v4 as uuid} from 'uuid';
-import multer from "multer";
-import sharp from "sharp";
 import {OperationRecord} from "../records/operation.record";
 import {NewOperationEntity} from "../types";
 import {PeriodRecord} from "../records/period.record";
 import {AddOperationToBudgetHandler} from "../utils/add-operation-to-budget-handler";
 import {ReverseOperationHandler} from "../utils/reverse-operation-handler";
 import {sendSuccessJsonHandler} from "../utils/json-response-handlers";
-import {ValidationError} from "../utils/error";
-import {dirname, join} from "path";
-import {checkIfImageExists, userDirectoryHandler} from "../utils/user-directory-handler";
+import {checkIfImageExists} from "../utils/user-directory-handler";
 import {safeJoinPhotoPath} from "../utils/safe-join-path";
 import {deletingImgHandler} from "../utils/deleting-img-handler";
+import {getProperValueTypesFromReqHandler} from "../utils/get-proper-value-types-from-req-handler";
+import {uploadImageHandler} from "../utils/upload-image-handler";
+import {upload} from "../utils/upload";
 
 export const user = {
     id: '[test-user-id]',
 };  // @TODO remember to remove this mock when UserRecord is ready.
-
-const upload = multer({
-    limits: {
-        fileSize: 7000000,
-    },
-    fileFilter(req: Request, file: Express.Multer.File, cb: (error: ValidationError | null, isOk?: boolean) => void) {
-        if (!file.originalname.match(/\.(jpg|jpeg)$/) || (file.mimetype !== 'image/jpeg')) {
-            return cb(new ValidationError('Dodawany plik jest nieprawidłowy.'));
-        }
-        cb(null, true);
-    }
-})
 
 export const operationRouter = Router()
 
@@ -47,32 +33,42 @@ export const operationRouter = Router()
         sendSuccessJsonHandler(res, operation);
     })
 
-    .post('/', async (req: Request, res: Response) => {
+    .post('/', upload.single('image'), async (req: Request, res: Response) => {
         const actualPeriod = await PeriodRecord.getActual(user.id);
+        const imageUrl = await uploadImageHandler(req, res);
         const newOperation = new OperationRecord({
-            ...req.body,
+            ...getProperValueTypesFromReqHandler(req.body),
             userId: user.id,
             periodId: actualPeriod.id,
+            imgUrl: imageUrl ?? null,
         } as NewOperationEntity);
         await AddOperationToBudgetHandler(newOperation, actualPeriod);
         const newOperationId = await newOperation.insert();
         sendSuccessJsonHandler(res, newOperationId);
     })
 
-    .post('/repetitive-operation', async (req, res) => {
+    .post('/repetitive-operation', upload.single('image'), async (req, res) => {
         const actualPeriod = await PeriodRecord.getActual(user.id);
         const newRootOperation = new OperationRecord({
-            ...req.body,
+            ...getProperValueTypesFromReqHandler(req.body),
+            lat: null,
+            lon: null,
+            imgUrl: null,
             periodId: null,
             isRepetitive: true,
             userId: user.id,
         } as NewOperationEntity);
 
+        const imageUrl = await uploadImageHandler(req, res);
+
         const newActualOperation = new OperationRecord({
             ...newRootOperation,
+            lat: Number(req.body.lat),
+            lon: Number(req.body.lon),
             id: null,
             periodId: actualPeriod.id,
             originId: newRootOperation.id,
+            imgUrl: imageUrl ?? null,
         });
         await AddOperationToBudgetHandler(newActualOperation, actualPeriod);
         await newRootOperation.insert();
@@ -86,7 +82,8 @@ export const operationRouter = Router()
 
         await ReverseOperationHandler(foundOperation, actualPeriod);
         const editedOperation = new OperationRecord({
-            ...req.body,
+            // ...req.body,
+            ...getProperValueTypesFromReqHandler(req.body),
             id: foundOperation.id,
             userId: user.id,
         } as NewOperationEntity);
@@ -118,27 +115,7 @@ export const operationRouter = Router()
         sendSuccessJsonHandler(res, isRemoved);
     })
 
-    .post('/image', upload.single('upload'), async (req, res) => {
-
-        const name = uuid();
-
-        const imageDirname = join(dirname(__dirname), `/uploads/${user.id}`);
-        const folderExists = await userDirectoryHandler(imageDirname);
-
-        if (folderExists) {
-            await sharp(req.file.buffer)
-                .rotate()
-                .resize({
-                    height: 1200,
-                    fit: "contain",
-                })
-                .jpeg()
-                .toFile(`${imageDirname}/${name}.jpg`)
-            res.status(201)
-            sendSuccessJsonHandler(res, true);
-        } else throw new Error('Error while uploading new file.');
-    })
-    .get('/image/:id',async(req,res)=>{
+    .get('/image/:id', async (req, res) => {
         const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
         if (!foundOperation) {
             throw new Error('Searching operation does not exist.');
@@ -150,6 +127,6 @@ export const operationRouter = Router()
         await checkIfImageExists(safeImgPath);
 
         res.sendFile(safeImgPath);
-})
+    })
 
 

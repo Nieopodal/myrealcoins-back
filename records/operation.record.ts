@@ -63,7 +63,7 @@ export class OperationRecord implements OperationEntity {
         if (typeof obj.isRepetitive === 'undefined') {
             throw new Error('isRepetitive is required.');
         }
-        if (!obj.amount || typeof obj.amount !== 'number' || obj.amount < -999999999.99 || obj.amount > 999999999.99) {
+        if (!obj.amount || typeof Number(obj.amount) !== 'number' || Number(obj.amount) < -999999999.99 || Number(obj.amount > 999999999.99)) {
             throw new ValidationError('Kwota operacji powinna zawierać się w przedziale od -999 999 999,99 do 999 999 999,99.');
         }
         if (obj.type < 0 || typeof obj.type !== 'number') {
