@@ -80,14 +80,29 @@ export const operationRouter = Router()
         const actualPeriod = await PeriodRecord.getActual(user.id);
         const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
 
-        await ReverseOperationHandler(foundOperation, actualPeriod);
-        const editedOperation = new OperationRecord({
-            // ...req.body,
-            ...getProperValueTypesFromReqHandler(req.body),
+        new OperationRecord({
+            ...foundOperation,
             id: foundOperation.id,
             userId: user.id,
+            category: req.body.category,
+            subcategory: req.body.subcategory,
+            amount: req.body.amount,
+            description: req.body.description,
         } as NewOperationEntity);
-        const modifiedId = await editedOperation.update();
+
+        if (foundOperation.periodId) {
+            await ReverseOperationHandler(foundOperation, actualPeriod);
+        }
+        foundOperation.category = req.body.category;
+        foundOperation.subcategory = req.body.subcategory;
+        foundOperation.amount = req.body.amount;
+        foundOperation.description = req.body.description;
+
+        if (foundOperation.periodId) {
+            console.log(foundOperation.periodId, 'period')
+            await AddOperationToBudgetHandler(foundOperation, actualPeriod);
+        }
+        const modifiedId = await foundOperation.update();
         sendSuccessJsonHandler(res, modifiedId);
     })
 
