@@ -11,6 +11,7 @@ import {deletingImgHandler} from "../utils/deleting-img-handler";
 import {getProperValueTypesFromReqHandler} from "../utils/get-proper-value-types-from-req-handler";
 import {uploadImageHandler} from "../utils/upload-image-handler";
 import {upload} from "../utils/upload";
+import {ValidationError} from "../utils/error";
 
 export const user = {
     id: '[test-user-id]',
@@ -80,6 +81,10 @@ export const operationRouter = Router()
         const actualPeriod = await PeriodRecord.getActual(user.id);
         const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
 
+        if  (foundOperation.periodId && foundOperation.periodId !== actualPeriod.id) {
+            throw new ValidationError('Operacja nie należy do obecnego okresu.');
+        }
+
         new OperationRecord({
             ...foundOperation,
             id: foundOperation.id,
@@ -109,6 +114,10 @@ export const operationRouter = Router()
     .delete('/:id/:childId?', async (req: Request, res: Response) => {
         const actualPeriod = await PeriodRecord.getActual(user.id);
         const foundOperation = await OperationRecord.getOne(req.params.id, user.id);
+
+        if  (foundOperation.periodId && foundOperation.periodId !== actualPeriod.id) {
+            throw new ValidationError('Operacja nie należy do obecnego okresu.');
+        }
 
         if (!foundOperation.periodId) {
             const childOperation = await OperationRecord.getOne(req.params.childId, user.id);

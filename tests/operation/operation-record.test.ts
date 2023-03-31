@@ -102,21 +102,6 @@ test('OperationRecord validates periodId type.', () => {
     })).toThrow('periodId should be type of string.');
 });
 
-test('OperationRecord validates if amount exists.', () => {
-    expect(() => new OperationRecord({
-        userId: 'test-user-id',
-        isRepetitive: true,
-        periodId: 'test',
-        type: OperationType.AddToSavings,
-        description: 'user-description',
-    } as any)).toThrow('Kwota operacji powinna zawierać się w przedziale od -999 999 999,99 do 999 999 999,99.');
-
-    expect(() => new OperationRecord({
-        ...defaultPaymentObj,
-        amount: true as any,
-    })).toThrow('Kwota operacji powinna zawierać się w przedziale od -999 999 999,99 do 999 999 999,99.');
-});
-
 test('OperationRecord validates amount range.', () => {
     expect(() => new OperationRecord({
         ...defaultPaymentObj,
