@@ -1,19 +1,19 @@
 import {PeriodRecord} from "../../records/period.record";
 import {OperationRecord} from "../../records/operation.record";
-import {createNewOperationsFromRepetitiveHandler} from "../../utils/create-new-operations-from-repetitive-handler";
+import {createNewOperationFromRepetitiveHandler} from "../../utils/create-new-operation-from-repetitive-handler";
 import {pool} from "../../utils/db";
 
 afterAll(async () => {
     pool.end();
 });
 
-test('createNewOperationFromRepetitiveHandler can get all user`s root repetitive operations and create new ones which belongs to given period.', async () => {
+test('createNewOperationFromRepetitiveHandler can, based on a given scheme, create a new operation belonging to actual period.', async () => {
     const newPeriod = new PeriodRecord({
         budgetAmount: 5000,
-        freeCashAmount: 0,
+        freeCashAmount: 5000,
         isActive: false,
         paymentsAmount: 0,
-        savingsAmount: 5000,
+        savingsAmount: 0,
         userId: "[test-user-id-for-handlers]"
     });
     await newPeriod.insert();
@@ -29,7 +29,7 @@ test('createNewOperationFromRepetitiveHandler can get all user`s root repetitive
     });
     await rootOp.insert();
 
-    await createNewOperationsFromRepetitiveHandler(newPeriod.id, newPeriod.userId);
+    await createNewOperationFromRepetitiveHandler(rootOp.id, newPeriod.userId, newPeriod);
     const found = await OperationRecord.findPeriodOperations(newPeriod.id, newPeriod.userId);
     expect(found.length).toBe(1);
     expect(found[0].periodId).toBe(newPeriod.id);

@@ -4,9 +4,15 @@ import {user} from "./operation.router";    //@TODO remove this when UserRecord 
 import {OperationRecord} from "../records/operation.record";
 import {sendErrorJsonHandler, sendSuccessJsonHandler} from "../utils/json-response-handlers";
 import {insertNewPeriodHandler} from "../utils/insert-new-period-handler";
-import {createNewOperationsFromRepetitiveHandler} from "../utils/create-new-operations-from-repetitive-handler";
+import {createNewOperationFromRepetitiveHandler} from "../utils/create-new-operation-from-repetitive-handler";
 
 export const periodRouter = Router()
+
+    .post('/create-new-operation-from-schema/:id', async (req, res) => {
+        const actualPeriod = await PeriodRecord.getActual(user.id);
+        const isCreated = await createNewOperationFromRepetitiveHandler(req.params.id, user.id, actualPeriod);
+        sendSuccessJsonHandler(res, isCreated);
+    })
 
     .get('/', async (req: Request, res: Response) => {  //this will send all periods
         const periodList = await PeriodRecord.getAll(user.id);
@@ -29,17 +35,17 @@ export const periodRouter = Router()
             if (actualPeriod.checkIfActualPeriodShouldEnd()) {
                 await actualPeriod.closePeriod();
                 const newPeriod = await insertNewPeriodHandler(req, user.id);
-                await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
+
                 sendSuccessJsonHandler(res, newPeriod);
                 return;
             }
             sendErrorJsonHandler(res, 'Aktualny okres jeszcze się nie zakończył.');
             return;
         }
-        const newPeriod = await insertNewPeriodHandler(req, user.id);
-        await createNewOperationsFromRepetitiveHandler(newPeriod.id, user.id);
-        sendSuccessJsonHandler(res, newPeriod);
+        const repetitiveOperationIds = await insertNewPeriodHandler(req, user.id);
+        sendSuccessJsonHandler(res, repetitiveOperationIds);
     })
+
 
     .delete('/:id', async (req: Request, res: Response) => {
         const foundPeriod = await PeriodRecord.getOne(req.params.id, user.id);

@@ -74,6 +74,7 @@ export const operationRouter = Router()
         await AddOperationToBudgetHandler(newActualOperation, actualPeriod);
         await newRootOperation.insert();
         const newOperationId = await newActualOperation.insert();
+        console.log({newActualOperation, newRootOperation})
         sendSuccessJsonHandler(res, newOperationId);
     })
 
