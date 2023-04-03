@@ -70,3 +70,60 @@ test('UserRecord validates if email exists and is correct.', () => {
         email: 'test@example.',
     })).toThrow('Podano nieprawidłowy adres email.');
 });
+
+test('UserRecord validates if financialCushion is valid.', () => {
+    expect(() => new UserRecord({
+        ...defaultObj,
+        financialCushion: '32wss',
+    } as any)).toThrow('FinancialCushion must be a number be a number between 0 and 999 999 999.99');
+    expect(() => new UserRecord({
+        ...defaultObj,
+        financialCushion: -1,
+    })).toThrow('FinancialCushion must be a number be a number between 0 and 999 999 999.99');
+    expect(() => new UserRecord({
+        ...defaultObj,
+        financialCushion: 99999999999.99,
+    })).toThrow('FinancialCushion must be a number be a number between 0 and 999 999 999.99');
+});
+
+test('UserRecord validates if defaultBudgetAmount is valid.', () => {
+    expect(() => new UserRecord({
+        ...defaultObj,
+        defaultBudgetAmount: 'red',
+    } as any)).toThrow('DefaultBudgetAmount must be a number between 0 and 999 999.99.');
+
+    expect(() => new UserRecord({
+        ...defaultObj,
+        defaultBudgetAmount: -1,
+    })).toThrow('DefaultBudgetAmount must be a number between 0 and 999 999.99.');
+    expect(() => new UserRecord({
+        ...defaultObj,
+        defaultBudgetAmount: 99999999999.99,
+    })).toThrow('DefaultBudgetAmount must be a number between 0 and 999 999.99.');
+});
+
+test('UserRecord validates if given localizationSource is valid.', () => {
+    expect(() => new UserRecord({
+        ...defaultObj,
+        localizationSource: 'red',
+    } as any)).toThrow('Given localizationSource is invalid.');
+
+    expect(() => new UserRecord({
+        ...defaultObj,
+        localizationSource: -1,
+    })).toThrow('Given localizationSource is invalid.');
+
+    expect(() => new UserRecord({
+        ...defaultObj,
+        localizationSource: -1,
+    })).toThrow('Given localizationSource is invalid.');
+
+    expect(() => new UserRecord({
+        ...defaultObj,
+        localizationSource: 1.5,
+    })).toThrow('Given localizationSource is invalid.');
+    expect(() => new UserRecord({
+        ...defaultObj,
+        localizationSource: 4343,
+    })).toThrow('Given localizationSource is invalid.');
+});
