@@ -1,16 +1,16 @@
-import {Request, Response} from "express";
+import {Response} from "express";
 import {v4 as uuid} from "uuid";
 import {dirname, join} from "path";
 import {userDirectoryHandler} from "./user-directory-handler";
 import sharp from "sharp";
-import {user} from "../routers/operation.router";
 import {OperationType} from "../types";
+import {UserRequest} from "./user/auth-jwt";
 
-export const uploadImageHandler = async (req: Request, res: Response) => {
+export const uploadImageHandler = async (req: UserRequest, res: Response) => {
 
     if (req.file && Number(req.body.type) === OperationType.Payment) {
         const name = uuid() + '.jpg';
-        const imageDirname = join(dirname(__dirname), `/uploads/${user.id}`);
+        const imageDirname = join(dirname(__dirname), `/uploads/${req.userId}`);
         const folderExists = await userDirectoryHandler(imageDirname);
 
         if (folderExists) {

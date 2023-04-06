@@ -1,17 +1,32 @@
-import {Request} from "express";
 import {PeriodRecord} from "../records/period.record";
 import {OperationRecord} from "../records/operation.record";
+import {UserRecord} from "../records/user.record";
 
-export const insertNewPeriodHandler = async (req: Request, userId: string): Promise<OperationRecord[]> => {
+export const insertNewPeriodHandler = async (userId: string, newUser?: boolean): Promise<OperationRecord[] | PeriodRecord> => {
+    const user = await UserRecord.getOneById(userId);
+
+    if (!user) {
+        throw new Error('User not found.');
+    }
+
     const newPeriod = new PeriodRecord({
-        ...req.body,            //@TODO do we need req.body?
         id: null,
         userId: userId,
         isActive: true,
-        freeCashAmount: 5000,
-        budgetAmount: 5000, //@TODO change to user
+        freeCashAmount: user.defaultBudgetAmount,
+        budgetAmount: user.defaultBudgetAmount,
+        paymentsAmount: 0,
+        savingsAmount: 0,
+        ends: null,
+        starts: null,
+        createdAt: null,
     });
     await newPeriod.insert();
+    console.log(newPeriod);
+
+    if (newUser) {
+        return newPeriod;
+    }
 
     return await OperationRecord.findRepetitiveOperations(userId);
 };

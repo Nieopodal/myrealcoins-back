@@ -5,7 +5,7 @@ export const AddOperationToBudgetHandler = async (newOperation: NewOperationEnti
     if (!newOperation) {
         throw new Error('Operation not found.')
     }
-    switch(newOperation.type) {
+    switch (newOperation.type) {
         case OperationType.AddToBudget: {
             await actualPeriod.changeBudgetOperation(newOperation.amount);
             break;
@@ -27,15 +27,14 @@ export const AddOperationToBudgetHandler = async (newOperation: NewOperationEnti
             break;
         }
         case OperationType.AddToCushion: {
-            await actualPeriod.addToCushionOperation();
+            await actualPeriod.addToCushionOperation(newOperation.amount);
             break;
-            //     @TODO need to make this working first
         }
         case OperationType.AddFromCushion: {
-            await actualPeriod.addFromCushionOperation();
+            await actualPeriod.addFromCushionOperation(newOperation.amount);
             break;
-            //     @TODO need to make this working first
         }
-        default: throw new Error('Incorrect Operation Type.');
+        default:
+            throw new Error('Incorrect Operation Type.');
     }
 };

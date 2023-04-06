@@ -9,6 +9,10 @@ export interface UserEntity {
     addLocalizationByDefault: boolean;
 }
 
+export interface NewUserEntity extends Omit<UserEntity, 'id'> {
+    id?: string;
+}
+
 export enum LocalizationSource {
     None,
     UserDevice,
