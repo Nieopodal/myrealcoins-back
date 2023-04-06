@@ -19,7 +19,8 @@ export const userRouter = Router()
         }
 
         const pwd = req.body.password;
-        if (!pwd.match(/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)) {
+        console.log(pwd)
+        if (!pwd.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{7,15}$/)) {
             throw new ValidationError('Hasło powinno składać się z 7-15 znaków, w tym przynajmniej z 1 cyfry oraz znaku specjalnego.');
         }
 
@@ -58,13 +59,21 @@ export const userRouter = Router()
             throw new Error('User not found!');
         }
 
+        if (req.body.defaultBudgetAmount > 999999.99) {
+            throw new ValidationError('Domyślna kwota miesięcznego budżetu nie może przekraczać 999 999.99 PLN.');
+        }
+
+        if (req.body.defaultBudgetAmount > 999999999.99) {
+            throw new ValidationError('Kwota aktualnej poduszki finansowej nie może przekraczać 999 999 999.99 PLN.')
+        }
+
         user.financialCushion = req.body.financialCushion;
         user.defaultBudgetAmount = req.body.defaultBudgetAmount;
         user.addLocalizationByDefault = req.body.addLocalizationByDefault;
 
-        await user.update();
+        const updatedUser = await user.update();
 
-        sendSuccessJsonHandler(res, true);
+        sendSuccessJsonHandler(res, updatedUser);
     })
 
     .post('/session', async (req, res) => {

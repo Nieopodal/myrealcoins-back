@@ -4,7 +4,7 @@ import {dirname, join} from "path";
 import {userDirectoryHandler} from "./user-directory-handler";
 import sharp from "sharp";
 import {OperationType} from "../types";
-import {UserRequest} from "./user/auth-jwt";
+import {UserRequest} from "../types/_auth/_auth";
 
 export const uploadImageHandler = async (req: UserRequest, res: Response) => {
 

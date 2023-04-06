@@ -116,7 +116,7 @@ export class UserRecord implements UserEntity {
         return true;
     };
 
-    async update(): Promise<string> {
+    async update(): Promise<UserRecord> {
         if (!this.id) {
             throw new Error('Error while updating: given user has no ID!');
         }
@@ -127,6 +127,6 @@ export class UserRecord implements UserEntity {
             throw new Error('Error while updating, number of affected rows is 0.');
         }
 
-        return this.id;
+        return this;
     };
 }
