@@ -7,5 +7,7 @@
     corsOrigin: ‘http://localhost:3000’,
     cookieSecret: ‘SECRET’,
     jwtSecret: ‘SECRET’,
+    user: ‘user’,
+    password: ‘password’,
 };
  */

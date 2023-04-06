@@ -1,3 +1,5 @@
+import {UserStatus} from "../_auth/_auth";
+
 export interface UserEntity {
     id: string;
     email: string;
@@ -7,6 +9,9 @@ export interface UserEntity {
     defaultBudgetAmount: number;
     localizationSource: LocalizationSource;
     addLocalizationByDefault: boolean;
+    status: UserStatus;
+    confirmationCode: string;
+    resetPwdCode: string;
 }
 
 export interface NewUserEntity extends Omit<UserEntity, 'id'> {

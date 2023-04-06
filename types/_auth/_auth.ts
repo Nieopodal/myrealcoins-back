@@ -8,3 +8,8 @@ export interface UserRequest extends Request {
 export interface DecodedExtended extends jwt.JwtPayload {
     id?: string;
 }
+
+export enum UserStatus {
+    Pending,
+    Active,
+}
