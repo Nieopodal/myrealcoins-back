@@ -28,14 +28,12 @@ export const ReverseOperationHandler = async (foundOperation: OperationEntity, a
             break;
         }
         case OperationType.AddToCushion: {
-            await actualPeriod.addFromCushionOperation();
+            await actualPeriod.addFromCushionOperation(foundOperation.amount * -1);
             break;
-            //     @TODO need to make this working first
         }
         case OperationType.AddFromCushion: {
-            await actualPeriod.addToCushionOperation();
+            await actualPeriod.addToCushionOperation(foundOperation.amount * -1);
             break;
-            //     @TODO need to make this working first
         }
         default:
             throw new Error('Incorrect Operation Type.');

@@ -5,6 +5,7 @@ import {NewPeriodEntity, PeriodEntity} from "../types";
 import {getFirstAndLastDateOfActualMonth, getStandardFormattedDateTime} from "../utils/datetime-handlers";
 import {pool} from "../utils/db";
 import {ValidationError} from "../utils/error";
+import {UserRecord} from "./user.record";
 
 type PeriodRecordResults = [PeriodEntity[], FieldPacket[]];
 
@@ -169,16 +170,62 @@ export class PeriodRecord implements PeriodEntity {
         await this.update();
     };
 
-    async addToCushionOperation() {
-    } //@TODO make this working, amount should be -
+    async addToCushionOperation(amount: number, periodToClose?: boolean): Promise<void> {
+        const user = await UserRecord.getOneById(this.userId);
+        if (!user) {
+            throw new Error('User not found.');
+        }
+        if (amount > 0) {
+            throw new Error('Given amount should be smaller than 0.');
+        }
 
-    async addFromCushionOperation() {
-    } //@TODO make this working, amount should be +
+        if (amount === 0) return;
+
+        if ((user.financialCushion + (amount * -1)) > 999999999.99) {
+            throw new ValidationError('Przekroczono maksymalną kwotę poduszki finansowej wynoszącą 999 999 999.99.');
+        }
+        // const savedAmount = this.savingsAmount + this.freeCashAmount;
+        if (amount < 0) {
+            if (!periodToClose) {
+                if (this.freeCashAmount < (amount * -1)) {
+                    throw new ValidationError('Kwota operacji przewyższa sumę dostępnych środków.');
+                }
+                this.freeCashAmount += Number(amount.toFixed(2));
+                await this.update();
+            }
+            user.financialCushion += amount * -1;
+            await user.update();
+        }
+    };
+
+    async addFromCushionOperation(amount: number) {
+        const user = await UserRecord.getOneById(this.userId);
+
+        if (!user) {
+            throw new Error('User not found.');
+        }
+
+        if (amount < 0) {
+            throw new Error('Given amount should be greater than 0.');
+        }
+
+        if (amount > user.financialCushion) {
+            throw new ValidationError('Kwota operacji przewyższa sumę dostępnych środków.');
+        } else {
+            user.financialCushion -= amount;
+            this.freeCashAmount += Number(amount.toFixed(2));
+            this.budgetAmount += Number(amount.toFixed(2));
+
+            await this.update();
+            await user.update();
+        }
+    };
 
     async closePeriod(): Promise<void> {
         if (this.isActive === false) {
             throw new Error('Trying to close period which is already closed.');
         } else if (this.isActive === true) {
+            await this.addToCushionOperation(((this.freeCashAmount + this.savingsAmount) * -1), true);
             this.isActive = false;
             await this.update();
         } else {

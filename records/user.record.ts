@@ -63,6 +63,10 @@ export class UserRecord implements UserEntity {
             name,
         }) as UserRecordResults;
 
+        if (results.length > 1) {
+            throw new Error('Found more than one user.');
+        }
+
         return results.length === 0 ? null : new UserRecord(results[0]);
     };
 
@@ -82,6 +86,10 @@ export class UserRecord implements UserEntity {
         const [results] = await pool.execute("SELECT * FROM `users` WHERE `id` = :id", {
             id,
         }) as UserRecordResults;
+
+        if (results.length > 1) {
+            throw new Error('Found more than one user.');
+        }
 
         return results.length === 0 ? null : new UserRecord(results[0]);
     };
@@ -113,7 +121,7 @@ export class UserRecord implements UserEntity {
             throw new Error('Error while updating: given user has no ID!');
         }
 
-        const result = await pool.execute("UPDATE `users` SET `financialCushion` = :financialCushion, `defaultBudgetAmount` = :defaultBudgetAmount, `localizationSource` = :localizationSource, `addLocalizationByDefault` = :addLocalizationByDefault", this);
+        const result = await pool.execute("UPDATE `users` SET `financialCushion` = :financialCushion, `defaultBudgetAmount` = :defaultBudgetAmount, `localizationSource` = :localizationSource, `addLocalizationByDefault` = :addLocalizationByDefault WHERE `id` = :id", this);
 
         if ((result[0] as ResultSetHeader).affectedRows === 0) {
             throw new Error('Error while updating, number of affected rows is 0.');
