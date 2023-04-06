@@ -4,7 +4,8 @@ import {OperationRecord} from "../records/operation.record";
 import {sendErrorJsonHandler, sendSuccessJsonHandler} from "../utils/json-response-handlers";
 import {insertNewPeriodHandler} from "../utils/insert-new-period-handler";
 import {createNewOperationFromRepetitiveHandler} from "../utils/create-new-operation-from-repetitive-handler";
-import {UserRequest, verifyToken} from "../utils/user/auth-jwt";
+import {verifyToken} from "../utils/user/auth-jwt";
+import {UserRequest} from "../types/_auth/_auth";
 
 export const periodRouter = Router()
 

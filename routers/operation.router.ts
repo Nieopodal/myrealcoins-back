@@ -12,7 +12,8 @@ import {getProperValueTypesFromReqHandler} from "../utils/get-proper-value-types
 import {uploadImageHandler} from "../utils/upload-image-handler";
 import {upload} from "../utils/upload";
 import {ValidationError} from "../utils/error";
-import {UserRequest, verifyToken} from "../utils/user/auth-jwt";
+import {verifyToken} from "../utils/user/auth-jwt";
+import {UserRequest} from "../types/_auth/_auth";
 
 export const operationRouter = Router()
 
@@ -147,6 +148,6 @@ export const operationRouter = Router()
         await checkIfImageExists(safeImgPath);
 
         res.sendFile(safeImgPath);
-    })
+    });
 
 

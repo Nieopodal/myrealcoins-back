@@ -3,7 +3,7 @@ import {UserRecord} from "../../records/user.record";
 import {ValidationError} from "../error";
 
 export const checkDuplicateUsernameOrEmail = async (req: Request, res: Response, next: NextFunction) => {
-    // Username
+
     let user = await UserRecord.getOneByName(req.body.name);
     if (user) {
         throw new ValidationError('Użytkownik o takim loginie już istnieje.');

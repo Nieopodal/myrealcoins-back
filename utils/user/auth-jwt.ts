@@ -1,16 +1,9 @@
-import {NextFunction, Request, Response} from "express";
+import {NextFunction, Response} from "express";
 import * as jwt from 'jsonwebtoken';
 import {config} from "../../config/config";
 import {ValidationError} from "../error";
 import {sendSuccessJsonHandler} from "../json-response-handlers";
-
-export interface UserRequest extends Request {
-    userId: string;
-}
-
-interface DecodedExtended extends jwt.JwtPayload {
-    id?: string;
-}
+import {DecodedExtended, UserRequest} from "../../types/_auth/_auth";
 
 export const verifyToken = (req: UserRequest, res: Response, next: NextFunction) => {
     let token = req.session.token;

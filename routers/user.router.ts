@@ -6,9 +6,10 @@ import {sendSuccessJsonHandler} from "../utils/json-response-handlers";
 import {ValidationError} from "../utils/error";
 import {config} from "../config/config";
 import {checkDuplicateUsernameOrEmail} from "../utils/user/verify-sign-up";
-import {UserRequest, verifyToken} from "../utils/user/auth-jwt";
+import {verifyToken} from "../utils/user/auth-jwt";
 import {LocalizationSource} from "../types";
 import {PeriodRecord} from "../records/period.record";
+import {UserRequest} from "../types/_auth/_auth";
 
 export const userRouter = Router()
     .post('/signup', checkDuplicateUsernameOrEmail, async (req, res) => {
