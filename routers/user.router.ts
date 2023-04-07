@@ -14,7 +14,6 @@ import {sendConfirmationEmail} from "../config/nodemailer.config";
 export const userRouter = Router()
 
     .post('/signup', checkDuplicateUsernameOrEmail, async (req, res) => {
-
         if (req.body.password !== req.body.confirmPassword) {
             throw new ValidationError('Podane hasła nie są jednakowe.');
         }

@@ -1,5 +1,6 @@
 import {UserRecord} from "../../records/user.record";
 import {LocalizationSource, UserEntity} from "../../types";
+import {UserStatus} from "../../types/_auth/_auth";
 
 const defaultObj: UserEntity = {
     addLocalizationByDefault: true,
@@ -9,7 +10,10 @@ const defaultObj: UserEntity = {
     id: null,
     localizationSource: LocalizationSource.Receipt,
     name: "Test",
-    password: "test-password"
+    password: "test-password",
+    resetPwdCode: '',
+    confirmationCode: '',
+    status: UserStatus.Pending,
 };
 
 test('UserRecord can build a proper User Object.', () => {

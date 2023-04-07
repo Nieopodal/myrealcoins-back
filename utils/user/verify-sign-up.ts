@@ -6,12 +6,12 @@ export const checkDuplicateUsernameOrEmail = async (req: Request, res: Response,
 
     let user = await UserRecord.getOneByName(req.body.name);
     if (user) {
-        throw new ValidationError('Użytkownik o takim loginie już istnieje.');
+        throw new ValidationError('Login lub adres email znajdują się w bazie.');
     }
 
     user = await UserRecord.getOneByEmail(req.body.email)
     if (user) {
-        throw new ValidationError('Użytkownik o takim loginie już istnieje.');
+        throw new ValidationError('Login lub adres email znajdują się w bazie.');
     }
 
     next();

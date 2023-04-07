@@ -32,15 +32,5 @@ export const sendConfirmationEmail = (email: string, subject: string, h1: string
             throw new Error(err)
         });
 };
-//
-// transport.sendMail({
-//     from: config.user,
-//     to: email,
-//     subject: "Please confirm your account",
-//     html: `<h1>MyRealCoins - Email Confirmation</h1>
-//         <h2>Welcome to MyRealCoins</h2>
-//         <p>Thank you for being with us. Please confirm your email by clicking on the following link:</p>
-//         <a href=http://localhost:3000/confirm/${confirmationCode}>Click here</a>
-//         </div>`,
-// }).catch((err) => {throw new Error(err)});
+
 

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {Router} from 'express';
 import cors from 'cors';
 import 'express-async-errors';
 import {handleError} from "./utils/error";
@@ -8,29 +8,40 @@ import {periodRouter} from "./routers/period.router";
 import cookieSession from "cookie-session";
 import {userRouter} from "./routers/user.router";
 import {sessionRouter} from "./routers/session.router";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 const app = express();
 
 app
     .use(cors({
         origin: config.corsOrigin,
-
         credentials: true,
     }))
+
+    .use(rateLimit({
+        windowMs: 5 * 60 * 1000,
+        max: 150,
+    }))
+
     .use(express.json())
     .use(cookieSession({
             name: "session",
-            secret: config.cookieSecret, // @TODO should use as secret environment variable or better secret
+            secret: config.cookieSecret,
             httpOnly: true,
-            // secure: true,
         })
-    );
+    )
+    .use(helmet());
 
-app
+const prefixRouter = Router();
+
+prefixRouter
     .use('/operation', operationRouter)
     .use('/period', periodRouter)
     .use('/user', userRouter)
     .use('/session', sessionRouter);
+
+app.use('/api', prefixRouter);
 
 app.use(handleError);
 
