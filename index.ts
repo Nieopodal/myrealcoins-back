@@ -7,6 +7,7 @@ import {operationRouter} from "./routers/operation.router";
 import {periodRouter} from "./routers/period.router";
 import cookieSession from "cookie-session";
 import {userRouter} from "./routers/user.router";
+import {sessionRouter} from "./routers/session.router";
 
 const app = express();
 
@@ -21,7 +22,6 @@ app
             name: "session",
             secret: config.cookieSecret, // @TODO should use as secret environment variable or better secret
             httpOnly: true,
-            // domain: config.corsOrigin,
             // secure: true,
         })
     );
@@ -29,7 +29,8 @@ app
 app
     .use('/operation', operationRouter)
     .use('/period', periodRouter)
-    .use('/user', userRouter);
+    .use('/user', userRouter)
+    .use('/session', sessionRouter);
 
 app.use(handleError);
 

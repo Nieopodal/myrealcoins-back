@@ -8,7 +8,6 @@ import {config} from "../config/config";
 import {checkDuplicateUsernameOrEmail} from "../utils/user/verify-sign-up";
 import {verifyToken} from "../utils/user/auth-jwt";
 import {LocalizationSource} from "../types";
-import {PeriodRecord} from "../records/period.record";
 import {UserRequest, UserStatus} from "../types/_auth/_auth";
 import {sendConfirmationEmail} from "../config/nodemailer.config";
 
@@ -21,13 +20,11 @@ export const userRouter = Router()
         }
 
         const pwd = req.body.password;
-
         if (!pwd.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{7,15}$/)) {
             throw new ValidationError('Hasło powinno składać się z 7-15 znaków, w tym przynajmniej z 1 cyfry oraz znaku specjalnego.');
         }
 
         const emailToken = jwt.sign({email: req.body.email}, config.jwtSecret);
-
         const newUser = new UserRecord({
             id: null,
             name: req.body.name,
@@ -65,7 +62,6 @@ export const userRouter = Router()
             const emailToken = jwt.sign({email: req.body.email}, config.jwtSecret, {
                 expiresIn: 10800,
             });
-
             foundUser.resetPwdCode = emailToken;
             await foundUser.changePasswordOrResetToken();
 
@@ -86,13 +82,11 @@ export const userRouter = Router()
         if (!foundUser || foundUser.id !== req.params.userId) {
             throw new ValidationError('Podano nieprawidłowy token.');
         }
-
         if (req.body.password !== req.body.confirmPassword) {
             throw new ValidationError('Podane hasła nie są jednakowe.');
         }
 
         const pwd = req.body.password;
-
         if (!pwd.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{7,15}$/)) {
             throw new ValidationError('Hasło powinno składać się z 7-15 znaków, w tym przynajmniej z 1 cyfry oraz znaku specjalnego.');
         }
@@ -132,11 +126,9 @@ export const userRouter = Router()
         if (!user) {
             throw new Error('User not found!');
         }
-
         if (req.body.defaultBudgetAmount > 999999.99) {
             throw new ValidationError('Domyślna kwota miesięcznego budżetu nie może przekraczać 999 999.99 PLN.');
         }
-
         if (req.body.defaultBudgetAmount > 999999999.99) {
             throw new ValidationError('Kwota aktualnej poduszki finansowej nie może przekraczać 999 999 999.99 PLN.')
         }
@@ -146,66 +138,5 @@ export const userRouter = Router()
         user.addLocalizationByDefault = req.body.addLocalizationByDefault;
 
         const updatedUser = await user.update();
-
         sendSuccessJsonHandler(res, updatedUser);
-    })
-
-    .post('/session', async (req, res) => {
-        const user = await UserRecord.getOneByEmail(req.body.email);
-
-        if (!user) {
-            throw new ValidationError('Użytkownik lub hasło są nieprawidłowe.');
-        }
-
-        if (user.status === UserStatus.Pending) {
-            throw new ValidationError('Konto oczekuje na aktywację poprzez link aktywacyjny wysłany na podany adres e-mail.');
-        }
-
-        const passwordIsValid = bcrypt.compareSync(
-            req.body.password,
-            user.password
-        );
-
-        if (!passwordIsValid) {
-            throw new ValidationError('Email lub hasło są nieprawidłowe.');
-        }
-
-        const actualPeriod = await PeriodRecord.getActual(user.id);
-
-        const userToken = jwt.sign({id: user.id}, config.jwtSecret, {
-            expiresIn: 3600,
-        });
-
-        req.session.token = userToken;
-
-        sendSuccessJsonHandler(res, {
-            userToken,
-            user: {
-                ...user,
-                password: '',
-                confirmationCode: '',
-                resetPwdCode: '',
-            },
-            actualPeriod: actualPeriod ?? null,
-        });
-    })
-
-    .get('/check-user', verifyToken, async (req: UserRequest, res) => {
-        const currentUser = await UserRecord.getOneById((req.userId));
-        const actualPeriod = await PeriodRecord.getActual(currentUser.id);
-        sendSuccessJsonHandler(res, {
-            user: {
-                ...currentUser,
-                password: '',
-                confirmationCode: '',
-                resetPwdCode: '',
-            },
-            actualPeriod: actualPeriod ?? null,
-        });
-    })
-
-    .delete('/session', verifyToken, async (req, res) => {
-        req.session = null;
-
-        sendSuccessJsonHandler(res, "Wylogowano użytkownika.");
     });
