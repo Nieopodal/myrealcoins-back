@@ -1,5 +1,5 @@
-import * as bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import {Router} from "express";
 import {UserRecord} from "../records/user.record";
 import {sendSuccessJsonHandler} from "../utils/json-response-handlers";

@@ -1,6 +1,7 @@
 import {LocalizationSource, NewUserEntity} from "../../types";
 import {UserRecord} from "../../records/user.record";
 import {pool} from "../../utils/db";
+import {UserStatus} from "../../types/_auth/_auth";
 
 afterAll(async () => {
     await pool.end();
@@ -14,6 +15,9 @@ const defaultObj: NewUserEntity = {
     localizationSource: LocalizationSource.Receipt,
     name: "Test",
     password: "test-password",
+    status: UserStatus.Pending,
+    resetPwdCode: '',
+    confirmationCode: '',
 };
 
 test('UserRecord.insert inserts record into database. GetOneById can find this.', async () => {

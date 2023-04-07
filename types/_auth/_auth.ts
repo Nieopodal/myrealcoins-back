@@ -1,5 +1,5 @@
 import {Request} from "express";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 export interface UserRequest extends Request {
     userId: string;

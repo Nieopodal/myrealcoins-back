@@ -1,5 +1,5 @@
 import {NextFunction, Response} from "express";
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import {config} from "../../config/config";
 import {ValidationError} from "../error";
 import {sendSuccessJsonHandler} from "../json-response-handlers";
