@@ -3,6 +3,7 @@ import {pool} from "../utils/db";
 import {LocalizationSource, NewUserEntity, UserEntity} from "../types";
 import {FieldPacket, ResultSetHeader} from "mysql2";
 import {ValidationError} from "../utils/error";
+import {UserStatus} from "../types/_auth/_auth";
 
 type UserRecordResults = [UserEntity[], FieldPacket[]];
 
@@ -16,12 +17,18 @@ export class UserRecord implements UserEntity {
     defaultBudgetAmount: number;
     localizationSource: LocalizationSource;
     addLocalizationByDefault: boolean;
+    status: UserStatus;
+    confirmationCode: string;
+    resetPwdCode: string;
 
     constructor(obj: NewUserEntity) {
 
         this.validateNewUserEntity(obj);
 
         this.id = obj.id ?? uuid();
+        this.status = obj.status;
+        this.confirmationCode = obj.confirmationCode;
+        this.resetPwdCode = obj.resetPwdCode ?? null;
         this.email = obj.email;
         this.password = obj.password;
         this.name = obj.name;
@@ -70,6 +77,31 @@ export class UserRecord implements UserEntity {
         return results.length === 0 ? null : new UserRecord(results[0]);
     };
 
+    static async getOneByConfirmationCode(confirmationCode: string, isPwdReset: boolean): Promise<null | UserRecord> {
+        if (isPwdReset) {
+
+            const [results] = await pool.execute("SELECT * FROM `users` WHERE `resetPwdCode` = :resetPwdCode", {
+                resetPwdCode: confirmationCode,
+            }) as UserRecordResults;
+
+            if (results.length > 1) {
+                throw new Error('Found more than one user.');
+            }
+
+            return results.length === 0 ? null : new UserRecord(results[0]);
+        }
+
+        const [results] = await pool.execute("SELECT * FROM `users` WHERE `confirmationCode` = :confirmationCode", {
+            confirmationCode,
+        }) as UserRecordResults;
+
+        if (results.length > 1) {
+            throw new Error('Found more than one user.');
+        }
+
+        return results.length === 0 ? null : new UserRecord(results[0]);
+    };
+
     static async getOneByEmail(email: string): Promise<null | UserRecord> {
         const [results] = await pool.execute("SELECT * FROM `users` WHERE `email` = :email", {
             email,
@@ -95,7 +127,7 @@ export class UserRecord implements UserEntity {
     };
 
     async insert(): Promise<string> {
-        await pool.execute("INSERT INTO `users` (`id`, `email`, `password`, `name`, `financialCushion`, `defaultBudgetAmount`, `localizationSource`, `addLocalizationByDefault`) VALUES(:id, :email, :password, :name, :financialCushion, :defaultBudgetAmount, :localizationSource, :addLocalizationByDefault)", this);
+        await pool.execute("INSERT INTO `users` (`id`, `email`, `password`, `name`, `financialCushion`, `defaultBudgetAmount`, `localizationSource`, `addLocalizationByDefault`, `status`, `confirmationCode`) VALUES(:id, :email, :password, :name, :financialCushion, :defaultBudgetAmount, :localizationSource, :addLocalizationByDefault, :status, :confirmationCode)", this);
 
         return this.id;
     };
@@ -121,7 +153,7 @@ export class UserRecord implements UserEntity {
             throw new Error('Error while updating: given user has no ID!');
         }
 
-        const result = await pool.execute("UPDATE `users` SET `financialCushion` = :financialCushion, `defaultBudgetAmount` = :defaultBudgetAmount, `localizationSource` = :localizationSource, `addLocalizationByDefault` = :addLocalizationByDefault WHERE `id` = :id", this);
+        const result = await pool.execute("UPDATE `users` SET `financialCushion` = :financialCushion, `defaultBudgetAmount` = :defaultBudgetAmount, `localizationSource` = :localizationSource, `addLocalizationByDefault` = :addLocalizationByDefault, `confirmationCode` = :confirmationCode WHERE `id` = :id", this);
 
         if ((result[0] as ResultSetHeader).affectedRows === 0) {
             throw new Error('Error while updating, number of affected rows is 0.');
@@ -129,4 +161,20 @@ export class UserRecord implements UserEntity {
 
         return this;
     };
+
+    async activateUser(): Promise<void> {
+        const result = await pool.execute("UPDATE `users` SET `status`= :status WHERE `id` = :id", this);
+
+        if ((result[0] as ResultSetHeader).affectedRows === 0) {
+            throw new Error('Error while updating, number of affected rows is 0.');
+        }
+    };
+
+    async changePasswordOrResetToken() {
+        const result = await pool.execute("UPDATE `users` SET `password`= :password, `resetPwdCode` = :resetPwdCode WHERE `id` = :id", this);
+
+        if ((result[0] as ResultSetHeader).affectedRows === 0) {
+            throw new Error('Error while updating, number of affected rows is 0.');
+        }
+    }
 }

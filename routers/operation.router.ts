@@ -70,7 +70,6 @@ export const operationRouter = Router()
         await AddOperationToBudgetHandler(newActualOperation, actualPeriod);
         await newRootOperation.insert();
         const newOperationId = await newActualOperation.insert();
-        console.log({newActualOperation, newRootOperation})
         sendSuccessJsonHandler(res, newOperationId);
     })
 
@@ -101,7 +100,6 @@ export const operationRouter = Router()
         foundOperation.description = req.body.description;
 
         if (foundOperation.periodId) {
-            console.log(foundOperation.periodId, 'period')
             await AddOperationToBudgetHandler(foundOperation, actualPeriod);
         }
         const modifiedId = await foundOperation.update();

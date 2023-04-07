@@ -31,7 +31,6 @@ export const periodRouter = Router()
     })
 
     .post('/', verifyToken, async (req: UserRequest, res: Response) => {
-        console.log('tutaj jestm')
         const actualPeriod = await PeriodRecord.getActual(req.userId);
         if (actualPeriod) {
             if (actualPeriod.checkIfActualPeriodShouldEnd()) {
