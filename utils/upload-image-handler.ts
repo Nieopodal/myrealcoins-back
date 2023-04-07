@@ -17,7 +17,7 @@ export const uploadImageHandler = async (req: UserRequest, res: Response) => {
             await sharp(req.file.buffer)
                 .rotate()
                 .resize({
-                    height: 1000,
+                    height: 800,
                     fit: "contain",
                 })
                 .jpeg()
