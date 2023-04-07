@@ -10,7 +10,7 @@ export const transport = nodemailer.createTransport({
 });
 
 export const sendConfirmationEmail = (email: string, subject: string, h1: string, h2: string, text: string, url?: string) => {
-        const host = 'http://localhost:3000';
+        const host = 'https://www.myrealcoins.networkmanager.pl/';
         transport.sendMail({
             from: config.user,
             to: email,

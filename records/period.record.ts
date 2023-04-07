@@ -47,7 +47,6 @@ export class PeriodRecord implements PeriodEntity {
     };
 
     async initUserBudgetAmount(): Promise<boolean> {
-        //     @TODO finish when UserRecord is ready
         this.budgetAmount = 5000;
         return true;
     };
