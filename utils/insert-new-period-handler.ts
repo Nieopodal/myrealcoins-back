@@ -22,7 +22,6 @@ export const insertNewPeriodHandler = async (userId: string, newUser?: boolean):
         createdAt: null,
     });
     await newPeriod.insert();
-    console.log(newPeriod);
 
     if (newUser) {
         return newPeriod;
