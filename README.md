@@ -79,8 +79,13 @@ Otwórz w przeglądarce:
 
 > [http://localhost:3000](http://localhost:3000)
 
-![1](https://user-images.githubusercontent.com/123494717/231288592-4f42f8ae-ba57-47c2-ab07-ca33fab7906b.jpg)
+##
+
+![1](https://user-images.githubusercontent.com/123494717/231288940-56810172-024e-481b-9ba0-5a3f384cc31d.jpg)
 
 ![MM night](https://github.com/Nieopodal/myrealcoins-front/assets/123494717/934990a8-fd69-4252-85e7-51b7267e64a2)
 
+![image](https://github.com/Nieopodal/myrealcoins-front/assets/123494717/bb177658-28dc-485e-a0f9-d42583e5cef9)
+
 ![mm mobile](https://github.com/Nieopodal/myrealcoins-front/assets/123494717/2f3350e1-ee0f-462a-8b62-aae095ca57c2)
+
